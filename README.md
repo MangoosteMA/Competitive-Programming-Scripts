@@ -1,1 +1,1 @@
-# Competitive-programming-scripts
+# Competitive programming scripts
