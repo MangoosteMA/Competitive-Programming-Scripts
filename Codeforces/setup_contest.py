@@ -24,35 +24,7 @@ def setup_contest(contest, contest_title, extra_files=None, extra_problem_files=
             print(f'Tests created: {n_tests}\n')
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Contest arguments parser.')
-    parser.add_argument('-url',
-                        dest='url',
-                        required=True,
-                        metavar='url',
-                        help='Link to the problems of the contest.')
-
-    parser.add_argument('-problem_file',
-                        dest='problem_files',
-                        nargs=2,
-                        action='append',
-                        metavar=('file_name', 'file_template'),
-                        help='Add file inside each problem (copies from file_template).')
-
-    parser.add_argument('-contest_file',
-                        dest='contest_files',
-                        nargs=2,
-                        action='append',
-                        metavar=('file_name', 'file_template'),
-                        help='Add file inside the contest.')
-
-    parser.add_argument('-contest_name',
-                        dest='title',
-                        nargs='+',
-                        metavar='contest_name',
-                        help='Set the name of the contest (contest title from url is set by default).')
-
-    args = parser.parse_args()
+def setup_contest_from_args(args):
     contest = get_contest(args.url)
     if contest is None:
         print('Failed to load the contest.')
@@ -63,7 +35,3 @@ def main():
     print('Done!')
     n_problems = 0 if contest.problems is None else len(contest.problems)
     print(f'Problems created: {n_problems}')
-
-
-if __name__ == '__main__':
-    main()

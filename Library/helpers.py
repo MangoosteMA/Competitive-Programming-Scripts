@@ -5,3 +5,12 @@ def set_language(link, lang_flag, lang='en'):
     pos += len(lang_flag) + 1
     assert link[pos - 1] == '='
     return link[:pos] + lang
+
+
+def determine_system(link):
+    if link.find('codeforces') != -1:
+        return 'codeforces'
+    elif link.find('atcoder') != -1:
+        return 'atcoder'
+    else:
+        return None

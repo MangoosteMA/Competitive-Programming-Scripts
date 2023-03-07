@@ -27,22 +27,7 @@ def setup_problem(problem, directory='.', extra_files=None):
             subprocess.run(['cp', '-r', template, f'{directory}/{problem.index}/{file_name}'])
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Problem arguments parser.')
-    parser.add_argument('-url',
-                        dest='url',
-                        required=True,
-                        metavar='url',
-                        help='Link to the problem.')
-
-    parser.add_argument('-problem_file',
-                        dest='problem_files',
-                        nargs=2,
-                        action='append',
-                        metavar=('file_name', 'file_template'),
-                        help='Add file inside the problem (copies from file_template).')
-
-    args = parser.parse_args()
+def setup_problem_from_args(args):
     problem = get_problem(args.url)
     if problem is None:
         print('Failed to load the problem.')
@@ -55,7 +40,3 @@ def main():
     print('Done!')
     n_tests =  0 if problem.inputs is None else len(problem.inputs)
     print(f'Tests created: {n_tests}')
-
-
-if __name__ == '__main__':
-    main()
