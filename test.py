@@ -37,7 +37,7 @@ def get_ans(test):
         return None
     return test[:pos] + 'out' + test[pos + 2:]
 
-SEPARATOR = '============================================================='
+SEPARATOR = '==================================================='
 OK = colored('OK', 0, 255, 0)
 WA = colored('WA', 255, 70, 0)
 RE = colored('RE', 255, 70, 0)
