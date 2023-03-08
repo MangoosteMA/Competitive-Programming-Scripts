@@ -22,7 +22,7 @@ def setup_contest(contest, contest_title, extra_files=None, extra_problem_files=
     subprocess.run(['rm', '-r', f'{contest_title}'], capture_output=True)
     subprocess.run(['mkdir', contest_title])
     if extra_files is not None:
-        for file, template in extra_files:
+        for file_name, template in extra_files:
             subprocess.run(['cp', '-r', template, f'{contest_title}/{file_name}'])
 
     if contest.problems is not None:
