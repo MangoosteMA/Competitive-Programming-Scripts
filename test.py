@@ -1,13 +1,17 @@
 import subprocess
 import re
 import time
+import sys
 from os import listdir
 from argparse import ArgumentParser
 from Library.helpers import colored
 
 parser = ArgumentParser()
-parser.add_argument('solve',
-                    metavar='solve',
+parser.add_argument('-exec',
+                    dest='solve',
+                    nargs=1,
+                    required=True,
+                    metavar='exec',
                     help='Path to the executable file.')
 
 parser.add_argument('-test',
@@ -16,9 +20,20 @@ parser.add_argument('-test',
                     metavar='test',
                     help='Add test.')
 
+parser.add_argument('-compiler',
+                    metavar='compiler',
+                    help='Set the compiler in case you want to compile the code.')
+
+parser.add_argument('-compile_flags',
+                    dest='compile_flags',
+                    nargs='*',
+                    metavar='compile_flags',
+                    default=[],
+                    help='Add compiler flags.')
+
 args = parser.parse_args()
 
-main = args.solve
+main = args.solve[0]
 tests = args.tests
 if tests is None:
     tests = []
@@ -29,6 +44,15 @@ if tests is None:
     tests.sort(key=lambda test: 0 if len(test) == 2 else int(test[2:]))
 else:
     tests.sort()
+
+
+if args.compiler is not None:
+    compilation = [args.compiler, f'{main}.cpp', '-o', main]
+    for x in args.compile_flags:
+        compilation.append(f'-{x}')
+    result = subprocess.run(compilation)
+    if result.returncode != 0:
+        sys.exit(0)
 
 
 def get_ans(test):
