@@ -6,6 +6,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 from Codeforces.get_problem import get_problem
+from Library.helpers import colored
 
 
 def create_file(file, data):
@@ -30,13 +31,12 @@ def setup_problem(problem, directory='.', extra_files=None):
 def setup_problem_from_args(args):
     problem = get_problem(args.url)
     if problem is None:
-        print('Failed to load the problem.')
+        print(colored('Failed', 255, 0, 0), 'to load the problem.')
         sys.exit(0)
     if problem.index is None:
-        print('Failed to load the problem index.')
+        print(colored('Failed', 255, 0, 0), 'to load the problem index.')
         sys.exit(0)
 
     setup_problem(problem, extra_files=args.problem_files)
-    print('Done!')
     n_tests =  0 if problem.inputs is None else len(problem.inputs)
     print(f'Tests created: {n_tests}')

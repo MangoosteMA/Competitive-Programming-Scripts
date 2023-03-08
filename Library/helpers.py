@@ -14,3 +14,7 @@ def determine_system(link):
         return 'atcoder'
     else:
         return None
+
+
+def colored(text, red, green, blue):
+    return f"\033[38;2;{red};{green};{blue}m{text}\033[0m"
