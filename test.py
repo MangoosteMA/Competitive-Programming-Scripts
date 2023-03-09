@@ -31,6 +31,11 @@ parser.add_argument('-compile_flags',
                     default=[],
                     help='Add compiler flags.')
 
+parser.add_argument('-cmpl',
+                    action='store_true',
+                    default=False,
+                    help='Add if you want only to compile.')
+
 args = parser.parse_args()
 
 main = args.solve[0]
@@ -53,6 +58,9 @@ if args.compiler is not None:
     result = subprocess.run(compilation)
     if result.returncode != 0:
         sys.exit(0)
+
+if args.cmpl:
+    sys.exit(0)
 
 
 def get_ans(test):
