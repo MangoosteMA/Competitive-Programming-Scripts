@@ -61,6 +61,20 @@ def get_ans(test):
         return None
     return test[:pos] + 'out' + test[pos + 2:]
 
+
+def get_colored_result(first, second, must_be_equal):
+    text = ''
+    for i in range(len(first)):
+        cur = []
+        for j in range(len(first[i])):
+            if i >= len(second) or j >= len(second[i]) or first[i][j] != second[i][j]:
+                cur.append(colored(first[i][j], 255, 120, 120) if must_be_equal else colored(first[i][j], 120, 255, 120))
+            else:
+                cur.append(first[i][j])
+        text += ' '.join(cur) + '\n'
+    return text
+
+
 SEPARATOR = '==================================================='
 OK = colored('OK', 0, 255, 0)
 WA = colored('WA', 255, 70, 0)
@@ -80,7 +94,10 @@ for test in tests:
     result = subprocess.run([f'./{main}'], stdin=open(test, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     total_time = time.time() - start_time
 
+    colored_output = None
+    colored_expected_output = None
     print_data = False
+
     if result.returncode != 0:
         re += 1
         verdict = RE
@@ -89,25 +106,41 @@ for test in tests:
         unknown += 1
         verdict = UNKNOWN
         print_data = True
-    elif result.stdout.decode().strip() != open(expected_ans, 'r').read().strip():
-        wa += 1
-        print_data = True
-        verdict = WA
     else:
-        ok += 1
-        verdict = OK
+        lines = [x.strip().split() for x in result.stdout.decode().split('\n') if len(x.strip()) > 0]
+        correct_lines = [x.strip().split() for x in open(expected_ans, 'r').read().split('\n') if len(x.strip()) > 0]
+        if lines == correct_lines:
+            ok += 1
+            verdict = OK
+        else:
+            wa += 1
+            print_data = True
+            verdict = WA
+            colored_output = get_colored_result(lines, correct_lines, True)
+            colored_expected_output = get_colored_result(correct_lines, lines, False)
+
 
     print(f'Test ', colored(test, 255, 255, 50), ': ', verdict, f' ({int(total_time * 1000)} ms)', sep='')
     if print_data:
         print(open(test, 'r').read().strip('\n'))
+
+        if expected_ans is not None:
+            print('\nExpected output (', colored(expected_ans, 255, 255, 50), '):', sep='')
+            if colored_expected_output is not None:
+                print(colored_expected_output.strip('\n'))
+            else:
+                for line in correct_lines:
+                    print(' '.join(line))
+
         print('\nOutput:')
-        print(result.stdout.decode().strip('\n'))
+        if colored_output is None:
+            print(result.stdout.decode().strip('\n'))
+        else:
+            print(colored_output)
+
         if len(result.stderr.decode().strip('\n')) > 0:
             print('\nErr:')
             print(result.stderr.decode().strip('\n'))
-        if expected_ans is not None:
-            print('\nExpected output (', colored(expected_ans, 255, 255, 50), '):', sep='')
-            subprocess.run(['cat', expected_ans])
 
 print(SEPARATOR)
 if ok == len(tests):
