@@ -89,10 +89,15 @@ WA = colored('WA', 255, 70, 0)
 RE = colored('RE', 255, 70, 0)
 UNKNOWN = colored('Unknown', 120, 200, 235)
 
+OUTPUT = colored('Output', 255, 165, 0)
+EXPECTED_OUTPUT = colored('Expected output', 255, 165, 0)
+ERR = colored('Err', 255, 165, 0)
+
 ok = 0; wa = 0; re = 0; unknown = 0
 for test in tests:
     if ok + wa + re + unknown != 0:
         print(SEPARATOR)
+    print('Test ', colored(test, 255, 255, 50), ':', sep='', end=' ', flush=True)
 
     expected_ans = get_ans(test)
     if not expected_ans in listdir():
@@ -130,27 +135,27 @@ for test in tests:
             colored_expected_output = get_colored_result(correct_lines, lines, False)
 
 
-    print(f'Test ', colored(test, 255, 255, 50), ': ', verdict, f' ({int(total_time * 1000)} ms)', sep='')
+    print(verdict, f' ({int(total_time * 1000)} ms)', sep='')
     if print_data:
         print(open(test, 'r').read().strip('\n'))
-
-        if expected_ans is not None:
-            print('\nExpected output (', colored(expected_ans, 255, 255, 50), '):', sep='')
-            if colored_expected_output is not None:
-                print(colored_expected_output.strip('\n'))
-            else:
-                for line in correct_lines:
-                    print(' '.join(line))
-
-        print('\nOutput:')
+        print(f'\n{OUTPUT}:')
         if colored_output is None:
             print(result.stdout.decode().strip('\n'))
         else:
             print(colored_output)
 
         if len(result.stderr.decode().strip('\n')) > 0:
-            print('\nErr:')
+            print(f'{ERR}:')
             print(result.stderr.decode().strip('\n'))
+            print()
+
+        if expected_ans is not None:
+            print(f'{EXPECTED_OUTPUT} (', colored(expected_ans, 255, 255, 50), '):', sep='')
+            if colored_expected_output is not None:
+                print(colored_expected_output.strip('\n'))
+            else:
+                for line in correct_lines:
+                    print(' '.join(line))
 
 print(SEPARATOR)
 if ok == len(tests):
