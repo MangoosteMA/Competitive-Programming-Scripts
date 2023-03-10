@@ -106,6 +106,10 @@ for test in tests:
     colored_expected_output = None
     print_data = False
 
+    lines = [x.strip().split() for x in result.stdout.decode().split('\n') if len(x.strip()) > 0]
+    if expected_ans is not None:
+        correct_lines = [x.strip().split() for x in open(expected_ans, 'r').read().split('\n') if len(x.strip()) > 0]
+
     if result.returncode != 0:
         re += 1
         verdict = RE
@@ -115,8 +119,6 @@ for test in tests:
         verdict = UNKNOWN
         print_data = True
     else:
-        lines = [x.strip().split() for x in result.stdout.decode().split('\n') if len(x.strip()) > 0]
-        correct_lines = [x.strip().split() for x in open(expected_ans, 'r').read().split('\n') if len(x.strip()) > 0]
         if lines == correct_lines:
             ok += 1
             verdict = OK
