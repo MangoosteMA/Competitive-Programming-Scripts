@@ -23,9 +23,12 @@ def parse_problem_from_html(html_code, link=None):
         pre_node = node.find('pre', recursive=False)
         text = ''
         for child in pre_node.children:
+            if child.name == 'br':
+                text += '\n'
             text += child.text
             if child.name == 'div':
                 text += '\n'
+        text = text.strip('\n') + '\n'
         if node['class'] == ['input']:
             inputs.append(text)
         elif node['class'] == ['output']:
