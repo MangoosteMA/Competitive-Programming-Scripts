@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from Library.helpers import set_language
+from Library.helpers import set_language, get_html_code
 from Library.default_classes import Problem
 
 
@@ -45,17 +45,17 @@ def parse_problem_from_html(html_code, link=None):
     return Problem(title=problem_title, index=problem_index, link=link, tags=tags, difficulty=difficulty, inputs=inputs, outputs=outputs)
 
 
-def get_problem(url):
-    response = requests.get(set_language(url, 'locale', 'en'))
-    if response.status_code != 200:
+def get_problem(url, use_selenium=False):
+    html_code = get_html_code(set_language(url, 'locale', 'en'), use_selenium=use_selenium)
+    if html_code is None:
         return None
 
-    return parse_problem_from_html(response.text, link=url)
+    return parse_problem_from_html(html_code, link=url)
 
 
 def main():
     url = input('Input the link to the problem: ')
-    problem = get_problem(url)
+    problem = get_problem(url, use_selenium=False)
     if problem is None:
         print('Failed to load tests.')
         sys.exit(0)

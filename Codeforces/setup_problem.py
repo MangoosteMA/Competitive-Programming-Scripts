@@ -29,7 +29,7 @@ def setup_problem(problem, directory='.', extra_files=None):
 
 
 def setup_problem_from_args(args):
-    problem = get_problem(args.url)
+    problem = get_problem(args.url, use_selenium=args.selenium)
     if problem is None:
         print(colored('Failed', 255, 0, 0), 'to load the problem.')
         sys.exit(0)

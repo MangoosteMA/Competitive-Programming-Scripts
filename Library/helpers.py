@@ -18,3 +18,19 @@ def determine_system(link):
 
 def colored(text, red, green, blue):
     return f"\033[38;2;{red};{green};{blue}m{text}\033[0m"
+
+
+def get_html_code(url, use_selenium=False):
+    if not use_selenium:
+        import requests
+        result = requests.get(url)
+        return None if result.status_code != 200 else result.text
+    else:
+        from selenium import webdriver
+        print('Creating driver.')
+        driver = webdriver.Chrome()
+        driver.get(url)
+        html_code = driver.page_source
+        driver.close()
+        print('Got html code!')
+        return html_code

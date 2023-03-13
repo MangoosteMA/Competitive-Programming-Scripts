@@ -25,11 +25,16 @@ def main():
                         metavar=('file_name', 'file_template'),
                         help='Add file inside the contest.')
 
-    parser.add_argument('-contest_name',
+    parser.add_argument('-name',
                         dest='title',
                         nargs='+',
                         metavar='contest_name',
                         help='Set the name of the contest (contest title from url is set by default).')
+
+    parser.add_argument('-selenium',
+                        action='store_true',
+                        default=False,
+                        help='Add if you want only to use selenium (useful only during the contest).')
 
     args = parser.parse_args()
     system = determine_system(args.url)

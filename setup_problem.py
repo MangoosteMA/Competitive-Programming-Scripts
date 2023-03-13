@@ -18,6 +18,11 @@ def main():
                         metavar=('file_name', 'file_template'),
                         help='Add file inside the problem (copies from file_template).')
 
+    parser.add_argument('-selenium',
+                        action='store_true',
+                        default=False,
+                        help='Add if you want only to use selenium (useful only during the contest).')
+
     args = parser.parse_args()
     system = determine_system(args.url)
     print(f'Judge system: {system}')

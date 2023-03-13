@@ -35,7 +35,7 @@ def setup_contest(contest, contest_title, extra_files=None, extra_problem_files=
 
 def setup_contest_from_args(args):
     args.url = get_all_problems_link(args.url)
-    contest = get_contest(args.url)
+    contest = get_contest(args.url, use_selenium=args.selenium)
     if contest is None:
         print(colored('Failed', 255, 0, 0), 'to load the contest.')
         sys.exit(0)
