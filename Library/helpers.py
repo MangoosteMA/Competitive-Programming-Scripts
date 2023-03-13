@@ -29,6 +29,7 @@ def get_html_code(url, use_selenium=False):
         from selenium import webdriver
         print('Creating driver.')
         driver = webdriver.Chrome()
+        print('Requesting data.')
         driver.get(url)
         html_code = driver.page_source
         driver.close()
