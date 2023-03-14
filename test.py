@@ -140,7 +140,7 @@ for test in tests:
         print(open(test, 'r').read().strip('\n'))
         print(f'\n{OUTPUT}:')
         if colored_output is None:
-            print(result.stdout.decode().strip('\n'))
+            print(result.stdout.decode().strip('\n'), end='\n\n')
         else:
             print(colored_output)
 
