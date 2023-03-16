@@ -10,7 +10,9 @@ from Library.default_classes import Contest
 
 def parse_contest_from_html(html_code, link=None):
     soup = BeautifulSoup(html_code, 'html.parser')
-    contest_title = soup.find('div', {'class': 'caption'}).text
+    title_node = soup.find('div', {'class': 'caption'})
+    contest_title = None if title_node is None else title_node.text
+
     problems = []
     for problem in soup.find_all('div', 'problemindexholder'):
         problems.append(parse_problem_from_html(str(problem)))
