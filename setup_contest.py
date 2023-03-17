@@ -1,7 +1,9 @@
+import sys
 import argparse
 import subprocess
 from Library.helpers import determine_system
 from Codeforces.get_contest import get_contest_from_args as cf_get_contest_from_args
+from Atcoder.get_contest import get_contest_from_args as atcoder_get_contest_from_args
 from setup_problem import setup_problem
 
 
@@ -26,6 +28,8 @@ def setup_contest_from_args(args):
     contest = None
     if system == 'codeforces':
         contest = cf_get_contest_from_args(args)
+    elif system == 'atcoder':
+        contest = atcoder_get_contest_from_args(args)
     else:
         print(f'System \'{system}\' is not avaliable yet.')
         sys.exit(0)

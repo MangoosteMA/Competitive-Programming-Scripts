@@ -1,7 +1,9 @@
+import sys
 import argparse
 import subprocess
 from Library.helpers import determine_system
 from Codeforces.get_problem import get_problem_from_args as cf_get_problem_from_args
+from Atcoder.get_problem import get_problem_from_args as atcoder_get_problem_from_args
 
 
 def create_file(file, data):
@@ -29,6 +31,8 @@ def setup_problem_from_args(args):
     problem = None
     if system == 'codeforces':
         problem = cf_get_problem_from_args(args)
+    elif system == 'atcoder':
+        problem = atcoder_get_problem_from_args(args)
     else:
         print(f'System \'{system}\' is not avaliable yet.')
         sys.exit(0)
