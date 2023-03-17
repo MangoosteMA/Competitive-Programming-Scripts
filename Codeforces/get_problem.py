@@ -52,6 +52,10 @@ def get_problem(url, use_selenium=False):
     return parse_problem_from_html(html_code, link=url)
 
 
+def get_problem_from_args(args):
+    return get_problem(args.url, use_selenium=args.selenium)
+
+
 def main():
     url = input('Input the link to the problem: ')
     problem = get_problem(url, use_selenium=False)

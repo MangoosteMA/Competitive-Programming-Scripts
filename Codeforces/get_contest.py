@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 
 import os, sys
@@ -26,6 +27,18 @@ def get_contest(url, use_selenium=False):
         return None
 
     return parse_contest_from_html(html_code, link=url)
+
+
+def get_all_problems_link(link):
+    r = re.compile('https://codeforces.com/contest/[0-9]+')
+    mat = r.match(link)
+    assert mat is not None
+    return link[mat.span()[0] : mat.span()[1]] + '/problems'
+
+
+def get_contest_from_args(args):
+    contest = get_contest(get_all_problems_link(args.url), use_selenium=args.selenium)
+    return contest
 
 
 def main():
