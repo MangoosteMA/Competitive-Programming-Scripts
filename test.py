@@ -123,16 +123,15 @@ for test in tests:
         unknown += 1
         verdict = UNKNOWN
         print_data = True
+    elif lines == correct_lines:
+        ok += 1
+        verdict = OK
     else:
-        if lines == correct_lines:
-            ok += 1
-            verdict = OK
-        else:
-            wa += 1
-            print_data = True
-            verdict = WA
-            colored_output = get_colored_result(lines, correct_lines, True)
-            colored_expected_output = get_colored_result(correct_lines, lines, False)
+        wa += 1
+        print_data = True
+        verdict = WA
+        colored_output = get_colored_result(lines, correct_lines, True)
+        colored_expected_output = get_colored_result(correct_lines, lines, False)
 
 
     print(verdict, f' ({int(total_time * 1000)} ms)', sep='')
