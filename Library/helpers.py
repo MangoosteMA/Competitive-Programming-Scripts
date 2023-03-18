@@ -27,8 +27,11 @@ def get_html_code(url, use_selenium=False):
         return None if result.status_code != 200 else result.text
     else:
         from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
         print('Creating driver.')
-        driver = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(options=chrome_options)
         print('Requesting data.')
         driver.get(url)
         html_code = driver.page_source
