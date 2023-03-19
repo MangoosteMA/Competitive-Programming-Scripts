@@ -5,8 +5,8 @@ class Problem:
         self.link = link
         self.difficulty = difficulty
         self.tags = tags
-        self.inputs = [x.strip('\n') + '\n' for x in inputs]
-        self.outputs = [x.strip('\n') + '\n' for x in outputs]
+        self.inputs = None if inputs is None else [x.strip('\n') + '\n' for x in inputs]
+        self.outputs = None if outputs is None else [x.strip('\n') + '\n' for x in outputs]
 
     def __str__(self):
         result = f'Title: {self.title}\n'
