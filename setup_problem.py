@@ -1,6 +1,8 @@
 import sys
 import argparse
 import subprocess
+
+from Library.default_classes import Problem
 from Library.helpers import determine_system
 from Codeforces.get_problem import get_problem_from_args as cf_get_problem_from_args
 from Atcoder.get_problem import get_problem_from_args as atcoder_get_problem_from_args
@@ -26,20 +28,27 @@ def setup_problem(problem, directory='.', extra_files=None):
 
 
 def setup_problem_from_args(args):
-    system = determine_system(args.url)
-    print(f'Judge system: {system}')
-    problem = None
-    if system == 'codeforces':
-        problem = cf_get_problem_from_args(args)
-    elif system == 'atcoder':
-        problem = atcoder_get_problem_from_args(args)
-    else:
-        print(f'System \'{system}\' is not avaliable yet.')
-        sys.exit(0)
+    problem = Problem()
+    if args.url is not None:
+        system = determine_system(args.url)
+        print(f'Judge system: {system}')
+        if system == 'codeforces':
+            problem = cf_get_problem_from_args(args)
+        elif system == 'atcoder':
+            problem = atcoder_get_problem_from_args(args)
+        else:
+            print(f'System \'{system}\' is not avaliable yet.')
+            sys.exit(0)
 
-    if problem is None:
-        print(colored('Failed', 255, 0, 0), 'to load the problem.')
-        sys.exit(0)
+        if problem is None:
+            print(colored('Failed', 255, 0, 0), 'to load the problem.')
+            sys.exit(0)
+    else:
+        print('No url was given.')
+
+    if args.index is not None:
+        problem.index = args.index
+
     if problem.index is None:
         print(colored('Failed', 255, 0, 0), 'to load the problem index.')
         sys.exit(0)
@@ -53,9 +62,15 @@ def main():
     parser = argparse.ArgumentParser(description='Problem arguments parser.')
     parser.add_argument('-url',
                         dest='url',
-                        required=True,
                         metavar='url',
+                        default=None,
                         help='Link to the problem.')
+
+    parser.add_argument('-index',
+                        dest='index',
+                        metavar='index',
+                        default=None,
+                        help='Index of the problem.')
 
     parser.add_argument('-problem_file',
                         dest='problem_files',

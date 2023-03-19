@@ -1,6 +1,8 @@
 import sys
 import argparse
 import subprocess
+
+from Library.default_classes import Contest
 from Library.helpers import determine_system
 from Codeforces.get_contest import get_contest_from_args as cf_get_contest_from_args
 from Atcoder.get_contest import get_contest_from_args as atcoder_get_contest_from_args
@@ -23,20 +25,23 @@ def setup_contest(contest, contest_title, extra_files=None, extra_problem_files=
 
 
 def setup_contest_from_args(args):
-    system = determine_system(args.url)
-    print(f'Judge system: {system}')
-    contest = None
-    if system == 'codeforces':
-        contest = cf_get_contest_from_args(args)
-    elif system == 'atcoder':
-        contest = atcoder_get_contest_from_args(args)
-    else:
-        print(f'System \'{system}\' is not avaliable yet.')
-        sys.exit(0)
+    contest = Contest()
+    if args.url is not None:
+        system = determine_system(args.url)
+        print(f'Judge system: {system}')
+        if system == 'codeforces':
+            contest = cf_get_contest_from_args(args)
+        elif system == 'atcoder':
+            contest = atcoder_get_contest_from_args(args)
+        else:
+            print(f'System \'{system}\' is not avaliable yet.')
+            sys.exit(0)
 
-    if contest is None:
-        print(colored('Failed', 255, 0, 0), 'to load the contest.')
-        sys.exit(0)
+        if contest is None:
+            print(colored('Failed', 255, 0, 0), 'to load the contest.')
+            sys.exit(0)
+    else:
+        print('No url was given.')
 
     contest_title = contest.title if args.title is None else ''.join(x for x in args.title)
     setup_contest(contest, contest_title, extra_files=args.contest_files, extra_problem_files=args.problem_files)
@@ -48,8 +53,8 @@ def main():
     parser = argparse.ArgumentParser(description='Contest arguments parser.')
     parser.add_argument('-url',
                         dest='url',
-                        required=True,
                         metavar='url',
+                        default=None,
                         help='Link to the problems of the contest.')
 
     parser.add_argument('-problem_file',
