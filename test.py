@@ -55,11 +55,13 @@ if args.compiler is not None:
     compilation = [args.compiler, f'{main}.cpp', '-o', main]
     for x in args.compile_flags:
         compilation.append(f'-{x}')
+    start_time = time.time()
     result = subprocess.run(compilation)
+    total_time = time.time() - start_time
     if result.returncode != 0:
-        print(colored('Did not compile.', 255, 0, 0))
+        print(colored('Did not compile.', 255, 0, 0), f'{int(total_time * 1000)}ms')
         sys.exit(0)
-    print(colored('Compiled successfully.\n', 0, 255, 0))
+    print(colored('Compiled successfully.', 0, 255, 0), f'{int(total_time * 1000)}ms', end='\n\n')
 
 if args.cmpl:
     sys.exit(0)
