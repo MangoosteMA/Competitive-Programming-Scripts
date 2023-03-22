@@ -59,7 +59,7 @@ if args.compiler is not None:
     if result.returncode != 0:
         print(colored('Did not compile.', 255, 0, 0))
         sys.exit(0)
-    print(colored('Compiled successfully.', 0, 255, 0))
+    print(colored('Compiled successfully.\n', 0, 255, 0))
 
 if args.cmpl:
     sys.exit(0)
