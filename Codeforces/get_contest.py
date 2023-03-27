@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
+from Library.helpers import colored
 from Library.helpers import set_language, get_html_code
 from Codeforces.get_problem import parse_problem_from_html
 from Library.default_classes import Contest
@@ -37,7 +38,12 @@ def get_all_problems_link(link):
 
 
 def get_contest_from_args(args):
-    contest = get_contest(get_all_problems_link(args.url), use_selenium=args.selenium)
+    while True:
+        contest = get_contest(get_all_problems_link(args.url), use_selenium=args.selenium)
+        if contest.problems is not None:
+            break
+        print(colored('Failed to load the contest. Trying to load again.', 255, 0, 0))
+    print(colored('Contest is loaded!\n', 0, 255, 0))
     return contest
 
 
