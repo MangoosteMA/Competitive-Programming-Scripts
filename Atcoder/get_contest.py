@@ -22,7 +22,6 @@ def parse_contest_from_html(html_code, link=None):
 
     for index, title in enumerate(soup.find_all('span', {'class': 'h2'})):
         problems[index].index, problems[index].title = get_problem_index_and_title(title.text)
-        print(problems[index].index, problems[index].title)
 
     return Contest(title=contest_title, link=link, problems=problems)
 
