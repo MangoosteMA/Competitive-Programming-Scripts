@@ -4,8 +4,7 @@ from bs4 import BeautifulSoup
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from Library.helpers import colored
-from Library.helpers import set_language, get_html_code
+from Library.helpers import colored, set_language, get_html_code
 from Codeforces.get_problem import parse_problem_from_html
 from Library.default_classes import Contest
 
