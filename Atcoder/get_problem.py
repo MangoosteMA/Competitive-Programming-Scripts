@@ -8,6 +8,11 @@ from Library.helpers import set_language, get_html_code
 from Library.default_classes import Problem
 
 
+def get_problem_index_and_title(name):
+    pos = name.find('-')
+    return (name[:pos - 1], name[pos + 2:])
+
+
 def parse_problem_from_html(html_code, link=None):
     soup = BeautifulSoup(html_code, 'html.parser')
 
@@ -15,8 +20,7 @@ def parse_problem_from_html(html_code, link=None):
     problem_title = None
     problem_index = None
     if title_node is not None:
-        problem_title = title_node.text[4:]
-        problem_index = title_node.text[0]
+        problem_index, problem_title = get_problem_title_and_index(title_node.text)
 
     regex_input = re.compile(r'Sample Input [0-9]+')
     regex_output = re.compile(r'Sample Output [0-9]+')

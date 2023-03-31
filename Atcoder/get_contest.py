@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 from Library.helpers import colored
 from Library.helpers import set_language, get_html_code
-from Atcoder.get_problem import parse_problem_from_html
+from Atcoder.get_problem import get_problem_index_and_title, parse_problem_from_html
 from Library.default_classes import Contest
 
 
@@ -21,8 +21,8 @@ def parse_contest_from_html(html_code, link=None):
         problems.append(parse_problem_from_html(str(problem)))
 
     for index, title in enumerate(soup.find_all('span', {'class': 'h2'})):
-        problems[index].title = title.text[4:]
-        problems[index].index = title.text[0]
+        problems[index].index, problems[index].title = get_problem_index_and_title(title.text)
+        print(problems[index].index, problems[index].title)
 
     return Contest(title=contest_title, link=link, problems=problems)
 
