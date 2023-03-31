@@ -39,8 +39,10 @@ def get_all_problems_link(link):
 
 
 def get_contest_from_args(args):
+    link = get_all_problems_link(args.url)
+    print(f'Link to the problems: {link}')
     while True:
-        contest = get_contest(get_all_problems_link(args.url), use_selenium=args.selenium)
+        contest = get_contest(link, use_selenium=args.selenium)
         if contest.problems is None:
             print(colored('Failed to load the contest. Trying to load again.', 255, 0, 0))
             continue
