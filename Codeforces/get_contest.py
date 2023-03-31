@@ -32,6 +32,7 @@ def get_contest(url, use_selenium=False):
 
 def get_all_problems_link(link):
     r = re.compile('https://codeforces.com/contest/[0-9]+')
+    link = re.sub('contests', 'contest', link)
     mat = r.match(link)
     assert mat is not None
     return link[mat.span()[0] : mat.span()[1]] + '/problems'
