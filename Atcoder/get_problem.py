@@ -20,7 +20,7 @@ def parse_problem_from_html(html_code, link=None):
     problem_title = None
     problem_index = None
     if title_node is not None:
-        problem_index, problem_title = get_problem_title_and_index(title_node.text)
+        problem_index, problem_title = get_problem_index_and_title(title_node.text)
 
     regex_input = re.compile(r'Sample Input [0-9]+')
     regex_output = re.compile(r'Sample Output [0-9]+')
