@@ -36,6 +36,11 @@ parser.add_argument('-cmpl',
                     default=False,
                     help='Add if you want only to compile.')
 
+parser.add_argument('-noerr',
+                    action='store_true',
+                    default=False,
+                    help='Add if you want not to show Err.')
+
 args = parser.parse_args()
 
 main = args.solve[0]
@@ -147,7 +152,7 @@ for test in tests:
         else:
             print(colored_output)
 
-        if len(result.stderr.decode().strip('\n')) > 0:
+        if len(result.stderr.decode().strip('\n')) > 0 and not args.noerr:
             print(f'{ERR}:')
             print(result.stderr.decode().strip('\n'))
             print()
