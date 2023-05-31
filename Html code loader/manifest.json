@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Html code loader",
+  "description": "Downloads the html code of the page to the file output.html",
+  "version": "1.0",
+  "icons": {
+    "512" : "html_logo.png"
+  },
+  "action": {
+    "default_icon" : "html_logo.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "downloads"
+  ]
+}
