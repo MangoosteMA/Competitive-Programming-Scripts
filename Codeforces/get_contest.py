@@ -38,17 +38,20 @@ def get_all_problems_link(link):
 
 
 def get_contest_from_args(args):
-    link = get_all_problems_link(args.url)
-    print(f'Link to the problems: {link}')
-    while True:
-        contest = get_contest(link, use_selenium=args.selenium)
-        if contest.problems is None:
-            print(colored('Failed to load the contest. Trying to load again.', 255, 0, 0))
-            continue
-        if len(contest.problems) == 0:
-            print(colored('None problems parsed. Trying to load again.', 255, 0, 0))
-            continue
-        break
+    if args.html_code is not None:
+        contest = parse_contest_from_html(args.html_code, link=args.url)
+    else:
+        link = get_all_problems_link(args.url)
+        print(f'Link to the contest: {link}')
+        while True:
+            contest = get_contest(link, use_selenium=args.selenium)
+            if contest.problems is None:
+                print(colored('Failed to load the contest. Trying to load again.', 255, 0, 0))
+                continue
+            if len(contest.problems) == 0:
+                print(colored('None problems parsed. Trying to load again.', 255, 0, 0))
+                continue
+            break
 
     print(colored('Contest is loaded!\n', 0, 255, 0))
     return contest

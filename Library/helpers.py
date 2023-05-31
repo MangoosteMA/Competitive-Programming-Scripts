@@ -16,6 +16,17 @@ def determine_system(link):
         return None
 
 
+def determine_system_from_html(html_code):
+    codeforces_count = html_code.count('codeforces')
+    atcoder_count = html_code.count('atcoder')
+    if codeforces_count > atcoder_count:
+        return 'codeforces'
+    elif atcoder_count > codeforces_count:
+        return 'atcoder'
+    else:
+        return None
+
+
 def colored(text, red, green, blue):
     return f"\033[38;2;{red};{green};{blue}m{text}\033[0m"
 

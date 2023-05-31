@@ -3,7 +3,7 @@ import argparse
 import subprocess
 
 from Library.default_classes import Contest
-from Library.helpers import determine_system
+from Library.helpers import determine_system, colored, determine_system_from_html
 from Codeforces.get_contest import get_contest_from_args as cf_get_contest_from_args
 from Atcoder.get_contest import get_contest_from_args as atcoder_get_contest_from_args
 from setup_problem import setup_problem
@@ -25,9 +25,20 @@ def setup_contest(contest, contest_title, extra_files=None, extra_problem_files=
 
 
 def setup_contest_from_args(args):
+    if args.html_code is not None:
+        f = open(args.html_code, 'r')
+        if not args.keep_html:
+            subprocess.run(['rm', f'{args.html_code}'], capture_output=True)
+        args.html_code = f.read()
+        f.close()
+
     contest = Contest()
-    if args.url is not None:
-        system = determine_system(args.url)
+    if args.url is not None or args.html_code is not None:
+        if args.url is not None:
+            system = determine_system(args.url)
+        else:
+            system = determine_system_from_html(args.html_code)
+
         print(f'Judge system: {system}')
         if system == 'codeforces':
             contest = cf_get_contest_from_args(args)
@@ -81,6 +92,16 @@ def main():
                         action='store_true',
                         default=False,
                         help='Add if you want only to use selenium (useful only during the contest).')
+
+    parser.add_argument('-html_code',
+                        action='store',
+                        default=None,
+                        help='Path to the files that contains contest html.')
+
+    parser.add_argument('-keep_html',
+                        action='store_true',
+                        default=False,
+                        help='Set in case you want to keep html file.')
 
     setup_contest_from_args(parser.parse_args())
 

@@ -46,7 +46,9 @@ def get_problem(url, use_selenium=False):
 
 
 def get_problem_from_args(args):
-    return get_problem(args.url, use_selenium=args.selenium)
+    if args.html_code is None:
+        return get_problem(args.url, use_selenium=args.selenium)
+    return parse_problem_from_html(args.html_code, link=args.url)
 
 
 def main():
