@@ -33,3 +33,5 @@ alias fcmpl='python3 ~/Programming/Competitive-Programming-Scripts/test.py\
 
 alias fbld='python3 ~/Programming/Competitive-Programming-Scripts/test.py\
  -compiler g++-12 -compile_flags DLOCAL O2 std=c++20 -exec'
+
+alias stress_test='python3 ~/Programming/Competitive-Programming-Scripts/stress_test.py'
