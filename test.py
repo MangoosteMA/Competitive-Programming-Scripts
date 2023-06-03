@@ -8,8 +8,7 @@ from Library.helpers import colored
 
 parser = ArgumentParser()
 parser.add_argument('-exec',
-                    dest='solve',
-                    nargs=1,
+                    action='store',
                     required=True,
                     metavar='exec',
                     help='Path to the executable file.')
@@ -43,7 +42,7 @@ parser.add_argument('-noerr',
 
 args = parser.parse_args()
 
-main = args.solve[0]
+main = args.exec
 tests = args.tests
 if tests is None:
     tests = []
