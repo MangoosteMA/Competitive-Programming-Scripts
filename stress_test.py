@@ -64,9 +64,9 @@ for test_num in range(1, args.tests + 1):
             print(colored('Test:', 255, 255, 50))
             subprocess.run(['cat', TEST_NAME])
             print(colored('\nSolve output:', 255, 165, 0))
-            print(solve_result.stdout.decode())
+            print(solve_result.stdout.decode().strip('\n'))
             print(colored('\nCorrect output:', 255, 165, 0))
-            print(brute_result.stdout.decode())
+            print(brute_result.stdout.decode().strip('\n'))
         sys.exit(0)
 
 print(colored('\nLooks like everything is working fine!', 0, 255, 0))
