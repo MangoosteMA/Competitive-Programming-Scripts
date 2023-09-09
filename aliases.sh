@@ -23,10 +23,10 @@ alias fast_setup_contest='python3 ~/Programming/Competitive-Programming-Scripts/
 alias drun='python3 ~/Programming/Competitive-Programming-Scripts/test.py -exec'
 
 alias cmpl='python3 ~/Programming/Competitive-Programming-Scripts/test.py\
- -compiler clang++ -compile_flags DLOCAL g std=c++20 D_GLIBCXX_DEBUG Wall Wextra -cmpl -exec'
+ -compiler clang++ -compile_flags DLOCAL g std=c++20 D_GLIBCXX_DEBUG Wall Wextra fsanitize=address,undefined,bounds -cmpl -exec'
 
 alias bld='python3 ~/Programming/Competitive-Programming-Scripts/test.py\
- -compiler clang++ -compile_flags DLOCAL g std=c++20 D_GLIBCXX_DEBUG Wall Wextra -exec'
+ -compiler clang++ -compile_flags DLOCAL g std=c++20 D_GLIBCXX_DEBUG Wall Wextra fsanitize=address,undefined,bounds -exec'
 
 alias fcmpl='python3 ~/Programming/Competitive-Programming-Scripts/test.py\
  -compiler clang++ -compile_flags DLOCAL O2 std=c++20 -cmpl -exec'
