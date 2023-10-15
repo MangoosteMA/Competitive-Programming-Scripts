@@ -28,7 +28,7 @@ def determine_system_from_html(html_code):
 
 
 def colored(text, red, green, blue):
-    return f"\033[38;2;{red};{green};{blue}m{text}\033[0m"
+    return f'\033[38;2;{red};{green};{blue}m{text}\033[0m'
 
 
 def get_html_code(url, use_selenium=False):
