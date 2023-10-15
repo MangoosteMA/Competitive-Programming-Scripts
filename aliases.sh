@@ -35,3 +35,5 @@ alias fbld='python3 ~/Programming/Competitive-Programming-Scripts/test.py\
  -compiler clang++ -compile_flags DLOCAL O2 std=c++20 -exec'
 
 alias stress_test='python3 ~/Programming/Competitive-Programming-Scripts/stress_test.py'
+
+alias interact='python3 ~/Programming/Competitive-Programming-Scripts/interact.py'
