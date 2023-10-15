@@ -36,13 +36,15 @@ TEST_NAME = 'in_stress'
 for test_num in range(1, args.tests + 1):
     print(colored('\rTesting on test #', 255, 255, 50), colored(str(test_num), 0, 200, 200), sep='', end='')
     with open(TEST_NAME, 'w') as test:
-        generator_returncode = subprocess.run([f'./{args.gen}', '>', TEST_NAME], stdout=test, stderr=subprocess.PIPE).returncode
+        generator_returncode = subprocess.run([f'./{args.gen}'], stdout=test, stderr=subprocess.PIPE).returncode
+
     if generator_returncode != 0:
         print(colored('\nGenerator got RE.', 255, 70, 0))
         sys.exit(0)
 
     with open(TEST_NAME, 'r') as test:
         solve_result = subprocess.run([f'./{args.solve}'], stdin=test, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     if solve_result.returncode != 0:
         print(colored('\nSolution got RE.', 255, 70, 0))
         if not args.no_output:
@@ -55,9 +57,11 @@ for test_num in range(1, args.tests + 1):
 
     with open(TEST_NAME, 'r') as test:
         brute_result = subprocess.run([f'./{args.brute}'], stdin=test, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     if brute_result.returncode != 0:
         print(colored('\nCorrect solution got RE.', 255, 70, 0))
         sys.exit(0)
+
     if solve_result.stdout.decode().strip() != brute_result.stdout.decode().strip():
         print(colored('\nWrong answer', 255, 70, 0))
         if not args.no_output:
