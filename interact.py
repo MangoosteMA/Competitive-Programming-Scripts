@@ -127,8 +127,7 @@ while solve_process.is_running() or interactor_process.is_running():
         print(colored(solve_unprocess_output, 255, 255, 255), end='')
         interactor_process.communicate(solve_unprocess_output)
     elif interactor_unprocess_output is not None:
-        if len(interactor_unprocess_output) > 0:
-            print(colored(INTERACTOR_SEPARATOR + interactor_unprocess_output, 255, 255, 0), end='')
+        print(colored(INTERACTOR_SEPARATOR + interactor_unprocess_output, 255, 255, 0), end='')
         solve_process.communicate(interactor_unprocess_output)
 
 solve_process.terminate()
