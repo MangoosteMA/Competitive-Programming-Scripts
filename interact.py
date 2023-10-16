@@ -24,6 +24,11 @@ parser.add_argument('-timeout',
                     default=10,
                     help='Timeout in seconds.')
 
+parser.add_argument('-input',
+                    action='store',
+                    required=False,
+                    help='Path to the input file for interactor.')
+
 args = parser.parse_args()
 solve_exec = args.solve
 interactor_exec = args.interactor
@@ -73,6 +78,11 @@ class ExecutingPopen:
 
 solve_process = ExecutingPopen(solve_exec)
 interactor_process = ExecutingPopen(interactor_exec)
+
+if args.input is not None:
+    with open(args.input, 'r') as file:
+        for line in file:
+            interactor_process.communicate(line)
 
 solve_unprocess_output = ''
 interactor_unprocess_output = ''
