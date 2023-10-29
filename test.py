@@ -40,6 +40,11 @@ parser.add_argument('-noerr',
                     default=False,
                     help='Add if you want not to show Err.')
 
+parser.add_argument('-no-time-optimization',
+                    action='store_true',
+                    default=False,
+                    help='Add if you want not to show real time on the first test.')
+
 args = parser.parse_args()
 
 main = args.exec
@@ -110,6 +115,9 @@ for test in tests:
     expected_ans = get_ans(test)
     if not expected_ans in listdir():
         expected_ans = None
+
+    if not args.no_time_optimization:
+        subprocess.run([f'./{main}'], stdin=open(test, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     start_time = time.time()
     result = subprocess.run([f'./{main}'], stdin=open(test, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
