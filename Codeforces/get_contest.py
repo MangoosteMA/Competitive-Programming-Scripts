@@ -4,10 +4,9 @@ from bs4 import BeautifulSoup
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from Library.helpers import colored, set_language, get_html_code
-from Codeforces.get_problem import parse_problem_from_html
-from Library.default_classes import Contest
-
+from library.utils          import colored, set_language, get_html_code
+from codeforces.get_problem import parse_problem_from_html
+from library.contest        import Contest
 
 def parse_contest_from_html(html_code, link=None):
     soup = BeautifulSoup(html_code, 'html.parser')
@@ -20,7 +19,6 @@ def parse_contest_from_html(html_code, link=None):
 
     return Contest(title=contest_title, link=link, problems=problems)
 
-
 def get_contest(url, use_selenium=False):
     html_code = get_html_code(set_language(url, 'locale', 'en'), use_selenium=use_selenium)
     if html_code is None:
@@ -28,14 +26,12 @@ def get_contest(url, use_selenium=False):
 
     return parse_contest_from_html(html_code, link=url)
 
-
 def get_all_problems_link(link):
     r = re.compile('https://codeforces.com/contest/[0-9]+')
     link = re.sub('contests', 'contest', link)
     mat = r.match(link)
     assert mat is not None
     return link[mat.span()[0] : mat.span()[1]] + '/problems'
-
 
 def get_contest_from_args(args):
     if args.html_code is not None:
@@ -56,7 +52,6 @@ def get_contest_from_args(args):
     print(colored('Contest is loaded!\n', 0, 255, 0))
     return contest
 
-
 def main():
     url = input('Input the link to the problems: ')
     contest = get_contest(url, use_selenium=False)
@@ -65,7 +60,6 @@ def main():
         sys.exit(0)
 
     print(contest)
-
 
 if __name__ == '__main__':
     main()

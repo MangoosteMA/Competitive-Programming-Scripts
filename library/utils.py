@@ -6,7 +6,6 @@ def set_language(link, lang_flag, lang='en'):
     assert link[pos - 1] == '='
     return link[:pos] + lang
 
-
 def determine_system(link):
     if link.find('codeforces') != -1:
         return 'codeforces'
@@ -14,7 +13,6 @@ def determine_system(link):
         return 'atcoder'
     else:
         return None
-
 
 def determine_system_from_html(html_code):
     codeforces_count = html_code.count('codeforces')
@@ -26,10 +24,11 @@ def determine_system_from_html(html_code):
     else:
         return None
 
-
 def colored(text, red, green, blue):
     return f'\033[38;2;{red};{green};{blue}m{text}\033[0m'
 
+def dumpError(message):
+    print(colored(message, 255, 70, 0))
 
 def get_html_code(url, use_selenium=False):
     if not use_selenium:

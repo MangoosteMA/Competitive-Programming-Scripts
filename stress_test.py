@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import re
 import subprocess
 import sys
-from Library.helpers import colored
+from library.utils import colored
 
 parser = ArgumentParser()
 parser.add_argument('-solve',

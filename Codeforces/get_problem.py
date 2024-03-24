@@ -4,9 +4,8 @@ from bs4 import BeautifulSoup
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from Library.helpers import set_language, get_html_code
-from Library.default_classes import Problem
-
+from library.utils   import set_language, get_html_code
+from library.problem import Problem
 
 def parse_problem_from_html(html_code, link=None):
     soup = BeautifulSoup(html_code, 'html.parser')
@@ -43,7 +42,6 @@ def parse_problem_from_html(html_code, link=None):
 
     return Problem(title=problem_title, index=problem_index, link=link, tags=tags, difficulty=difficulty, inputs=inputs, outputs=outputs)
 
-
 def get_problem(url, use_selenium=False):
     html_code = get_html_code(set_language(url, 'locale', 'en'), use_selenium=use_selenium)
     if html_code is None:
@@ -51,12 +49,10 @@ def get_problem(url, use_selenium=False):
 
     return parse_problem_from_html(html_code, link=url)
 
-
 def get_problem_from_args(args):
     if args.html_code is None:
         return get_problem(args.url, use_selenium=args.selenium)
     return parse_problem_from_html(args.html_code, link=args.url)
-
 
 def main():
     url = input('Input the link to the problem: ')
@@ -66,7 +62,6 @@ def main():
         sys.exit(0)
 
     print(problem)
-
 
 if __name__ == '__main__':
     main()

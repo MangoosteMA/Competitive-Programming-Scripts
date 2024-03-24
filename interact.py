@@ -1,10 +1,10 @@
 import subprocess
-from queue import Queue
+from queue     import Queue
 from threading import Thread
-from argparse import ArgumentParser
-from time import time
+from argparse  import ArgumentParser
+from time      import time
 
-from Library.helpers import colored
+from library.utils import colored
 
 parser = ArgumentParser()
 parser.add_argument('-solve',

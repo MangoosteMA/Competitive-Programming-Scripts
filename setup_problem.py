@@ -2,16 +2,14 @@ import sys
 import argparse
 import subprocess
 
-from Library.default_classes import Problem
-from Library.helpers import determine_system, colored, determine_system_from_html
-from Codeforces.get_problem import get_problem_from_args as cf_get_problem_from_args
-from Atcoder.get_problem import get_problem_from_args as atcoder_get_problem_from_args
-
+from library.problem        import Problem
+from library.utils          import determine_system, colored, determine_system_from_html
+from codeforces.get_problem import get_problem_from_args as cf_get_problem_from_args
+from atcoder.get_problem    import get_problem_from_args as atcoder_get_problem_from_args
 
 def create_file(file, data):
     with open(file, 'w') as f:
         print(data, file=f)
-
 
 def setup_problem(problem, directory='.', extra_files=None):
     assert problem.index is not None
@@ -25,7 +23,6 @@ def setup_problem(problem, directory='.', extra_files=None):
     if extra_files is not None:
         for file_name, template in extra_files:
             subprocess.run(['cp', '-r', template, f'{directory}/{problem.index}/{file_name}'])
-
 
 def setup_problem_from_args(args):
     if args.html_code is not None:
@@ -67,7 +64,6 @@ def setup_problem_from_args(args):
     setup_problem(problem, extra_files=args.problem_files)
     n_tests =  0 if problem.inputs is None else len(problem.inputs)
     print(f'Tests created: {n_tests}')
-
 
 def main():
     parser = argparse.ArgumentParser(description='Problem arguments parser.')

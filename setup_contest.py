@@ -2,12 +2,11 @@ import sys
 import argparse
 import subprocess
 
-from Library.default_classes import Contest
-from Library.helpers import determine_system, colored, determine_system_from_html
-from Codeforces.get_contest import get_contest_from_args as cf_get_contest_from_args
-from Atcoder.get_contest import get_contest_from_args as atcoder_get_contest_from_args
-from setup_problem import setup_problem
-
+from library.contest        import Contest
+from library.utils          import determine_system, colored, determine_system_from_html
+from codeforces.get_contest import get_contest_from_args as cf_get_contest_from_args
+from atcoder.get_contest    import get_contest_from_args as atcoder_get_contest_from_args
+from setup_problem          import setup_problem
 
 def setup_contest(contest, contest_title, extra_files=None, extra_problem_files=None):
     subprocess.run(['rm', '-r', f'{contest_title}'], capture_output=True)
@@ -22,7 +21,6 @@ def setup_contest(contest, contest_title, extra_files=None, extra_problem_files=
             print(f'Problem {problem.index} is created!')
             n_tests = 0 if problem.inputs is None else len(problem.inputs)
             print(f'Tests created: {n_tests}\n')
-
 
 def setup_contest_from_args(args):
     if args.html_code is not None:
@@ -58,7 +56,6 @@ def setup_contest_from_args(args):
     setup_contest(contest, contest_title, extra_files=args.contest_files, extra_problem_files=args.problem_files)
     n_problems = 0 if contest.problems is None else len(contest.problems)
     print(f'Problems created: {n_problems}')
-
 
 def main():
     parser = argparse.ArgumentParser(description='Contest arguments parser.')

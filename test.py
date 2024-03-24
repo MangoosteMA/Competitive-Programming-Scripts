@@ -1,179 +1,290 @@
-import subprocess
+import os
 import re
-import time
+import subprocess
 import sys
-from os import listdir
-from argparse import ArgumentParser
-from Library.helpers import colored
+import time
 
-parser = ArgumentParser()
-parser.add_argument('-exec',
-                    action='store',
-                    required=True,
-                    metavar='exec',
-                    help='Path to the executable file.')
+from enum          import Enum
+from dataclasses   import dataclass
+from argparse      import ArgumentParser
+from library.utils import colored, dumpError
 
-parser.add_argument('-test',
-                    dest='tests',
-                    nargs='*',
-                    metavar='test',
-                    help='Add test.')
+class Tester:
+    '''
+    Variables:
+    mainExecutable:   str
+    extention:        str
+    tests:            list[Tester.Test]
+    compileOnly:      bool
+    compilerPath:     str or None
+    compilationFlags: list[str] or NOne
+    noErr:            bool
+    '''
 
-parser.add_argument('-compiler',
-                    metavar='compiler',
-                    help='Set the compiler in case you want to compile the code.')
+    TEST_NAME_REGEX = re.compile('in[0-9]+')
+    SEPARATOR = '=============================================='
 
-parser.add_argument('-compile_flags',
-                    dest='compile_flags',
-                    nargs='*',
-                    metavar='compile_flags',
-                    default=[],
-                    help='Add compiler flags.')
+    OK = colored('OK', 20, 255, 20)
+    WA = colored('WA', 255, 70, 0)
+    RE = colored('RE', 255, 70, 0)
+    UNKNOWN = colored('Unknown', 120, 200, 235)
 
-parser.add_argument('-cmpl',
-                    action='store_true',
-                    default=False,
-                    help='Add if you want only to compile.')
+    OUTPUT = colored('Output', 255, 165, 0)
+    EXPECTED_OUTPUT = colored('Expected output', 255, 165, 0)
+    ERR = colored('Err', 255, 165, 0)
 
-parser.add_argument('-noerr',
-                    action='store_true',
-                    default=False,
-                    help='Add if you want not to show Err.')
+    @dataclass
+    class Test:
+        testPath:   str
+        testAnswer: str
 
-parser.add_argument('-no-time-optimization',
-                    action='store_true',
-                    default=False,
-                    help='Add if you want not to show real time on the first test.')
+        def getTestIndex(self) -> int:
+            indexStart = self.testPath.find('in')
+            if indexStart == -1:
+                return -1
+            return int(self.testPath[indexStart + 2:])
 
-args = parser.parse_args()
+    class TestResult(Enum):
+        OK      = 0
+        WA      = 1
+        RE      = 2
+        UNKNOWN = 3
 
-main = args.exec
-tests = args.tests
-if tests is None:
-    tests = []
-    r = re.compile('in[0-9]+')
-    for test in listdir():
-        if r.match(test):
-            tests.append(test)
-    tests.sort(key=lambda test: 0 if len(test) == 2 else int(test[2:]))
-else:
-    tests.sort()
+    def __init__(self, args):
+        self.mainExecutable = args.exec
+        self.extention = args.ext
 
+        self.__parseCompiler(args)
+        self.compileOnly = args.cmplonly
+        if not self.compileOnly:
+            self.__registerTests(args.tests)
 
-if args.compiler is not None:
-    compilation = [args.compiler, f'{main}.cpp', '-o', main]
-    for x in args.compile_flags:
-        compilation.append(f'-{x}')
-    start_time = time.time()
-    result = subprocess.run(compilation)
-    total_time = time.time() - start_time
-    if result.returncode != 0:
-        print(colored('Did not compile.', 255, 0, 0), f'{int(total_time * 1000)}ms')
-        sys.exit(0)
-    print(colored('Compiled successfully.', 0, 255, 0), f'{int(total_time * 1000)}ms', end='\n\n')
+        self.noErr = args.noerr
 
-if args.cmpl:
-    sys.exit(0)
+    def run(self) -> None:
+        if self.compilerPath is not None:
+            self.__compile()
 
-
-def get_ans(test):
-    pos = test.find('in')
-    if pos == -1:
-        return None
-    return test[:pos] + 'out' + test[pos + 2:]
-
-
-def get_colored_result(first, second, must_be_equal):
-    text = ''
-    for i in range(len(first)):
-        cur = []
-        for j in range(len(first[i])):
-            if i >= len(second) or j >= len(second[i]) or first[i][j] != second[i][j]:
-                cur.append(colored(first[i][j], 255, 120, 120) if must_be_equal else colored(first[i][j], 120, 255, 120))
-            else:
-                cur.append(first[i][j])
-        text += ' '.join(cur) + '\n'
-    return text
-
-
-SEPARATOR = '==================================================='
-OK = colored('OK', 0, 255, 0)
-WA = colored('WA', 255, 70, 0)
-RE = colored('RE', 255, 70, 0)
-UNKNOWN = colored('Unknown', 120, 200, 235)
-
-OUTPUT = colored('Output', 255, 165, 0)
-EXPECTED_OUTPUT = colored('Expected output', 255, 165, 0)
-ERR = colored('Err', 255, 165, 0)
-
-ok = 0; wa = 0; re = 0; unknown = 0
-for test in tests:
-    if ok + wa + re + unknown != 0:
-        print(SEPARATOR)
-    print('Test ', colored(test, 255, 255, 50), ':', sep='', end=' ', flush=True)
-
-    expected_ans = get_ans(test)
-    if not expected_ans in listdir():
-        expected_ans = None
-
-    if not args.no_time_optimization:
-        subprocess.run([f'./{main}'], stdin=open(test, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    start_time = time.time()
-    result = subprocess.run([f'./{main}'], stdin=open(test, 'r'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    total_time = time.time() - start_time
-
-    colored_output = None
-    colored_expected_output = None
-    print_data = False
-
-    lines = [x.strip().split() for x in result.stdout.decode().split('\n') if len(x.strip()) > 0]
-    if expected_ans is not None:
-        correct_lines = [x.strip().split() for x in open(expected_ans, 'r').read().split('\n') if len(x.strip()) > 0]
-
-    if result.returncode != 0:
-        re += 1
-        verdict = RE
-        print_data = True
-    elif expected_ans is None:
-        unknown += 1
-        verdict = UNKNOWN
-        print_data = True
-    elif lines == correct_lines:
-        ok += 1
-        verdict = OK
-    else:
-        wa += 1
-        print_data = True
-        verdict = WA
-        colored_output = get_colored_result(lines, correct_lines, True)
-        colored_expected_output = get_colored_result(correct_lines, lines, False)
-
-
-    print(verdict, f' ({int(total_time * 1000)} ms)', sep='')
-    if print_data:
-        print(open(test, 'r').read().strip('\n'))
-        print(f'\n{OUTPUT}:')
-        if colored_output is None:
-            print(result.stdout.decode().strip('\n'), end='\n\n')
-        else:
-            print(colored_output)
-
-        if len(result.stderr.decode().strip('\n')) > 0 and not args.noerr:
-            print(f'{ERR}:')
-            print(result.stderr.decode().strip('\n'))
+        if not self.compileOnly:
             print()
+            self.__runTests()
 
-        if expected_ans is not None:
-            print(f'{EXPECTED_OUTPUT} (', colored(expected_ans, 255, 255, 50), '):', sep='')
-            if colored_expected_output is not None:
-                print(colored_expected_output.strip('\n'))
-            else:
-                for line in correct_lines:
-                    print(' '.join(line))
+# Private:
 
-print(SEPARATOR)
-if ok == len(tests):
-    print(colored('All tests passed!', 0, 255, 0))
-else:
-    print(f'{ok} {OK}, {wa} {WA}, {re} {RE}, {unknown} {UNKNOWN}.')
+    def __parseCompiler(self, args) -> None:
+        self.compilerPath = args.compiler
+        self.compilationFlags = ['-' + flag for flag in args.flags]
+
+    def __registerSingleTest(self, testPath: str) -> None:
+        if not os.path.isfile(testPath):
+            dumpError(f'No such file: {testPath}')
+            return
+
+        answerFileName = os.path.basename(testPath).replace('in', 'out')
+        directory = os.path.dirname(testPath)
+        testAnswer = None
+        if answerFileName in os.listdir('./' if len(directory) == 0 else directory):
+            testAnswer = os.path.join(directory, answerFileName)
+
+        self.tests.append(Tester.Test(testPath=testPath, testAnswer=testAnswer))
+
+    def __registerTests(self, testsNames: list[str] or None) -> None:
+        self.tests = []
+        if testsNames is not None:
+            for test in testsNames:
+                self.__registerSingleTest(test)
+            return
+
+        for testCandidate in os.listdir():
+            if Tester.TEST_NAME_REGEX.match(testCandidate) and os.path.isfile(testCandidate):
+                self.__registerSingleTest(testCandidate)
+        self.tests.sort(key=lambda test: test.getTestIndex())
+
+    def __compile(self) -> None:
+        solutionPath = f'{self.mainExecutable}.{self.extention}'
+        if not os.path.isfile(solutionPath):
+            dumpError(f'No solution file: {solutionPath}')
+            sys.exit(0)
+
+        command = [self.compilerPath, solutionPath, '-o', self.mainExecutable] + self.compilationFlags
+        compilationStartTime = time.time()
+        status = subprocess.run(command)
+        compilationTime = int((time.time() - compilationStartTime) * 1000)
+
+        if status.returncode != 0:
+            dumpError(f'\nDid not compile. ({compilationTime}ms)')
+            sys.exit(0)
+
+        print(colored('Compiled successfully.', 20, 255, 20), f'({compilationTime}ms)')
+
+    @staticmethod
+    def __compareOutput(outputLines, correctOutputLines) -> list[int]:
+        if correctOutputLines is None:
+            return []
+
+        differentLines = []
+        for i in range(0, max(len(outputLines), len(correctOutputLines))):
+            outputLine = outputLines[i] if i < len(outputLines) else ''
+            correctLine = correctOutputLines[i] if i < len(correctOutputLines) else ''
+            if outputLine.strip() != correctLine.strip():
+                differentLines.append(i)
+        
+        return differentLines
+
+    @staticmethod
+    def __addEmptyLine(lines: list[str]) -> list[str]:
+        if len(lines) == 0 or len(lines[-1]) != 0:
+            lines.append('')
+        return lines
+
+    def __dumpSingleTestOutput(self, test, outputLines, errOutput, correctOutputLines) -> None:
+        with open(test.testPath, 'r') as testFile:
+            print(testFile.read())
+
+        differentLines = self.__compareOutput(outputLines, correctOutputLines)
+
+        outputLines = Tester.__addEmptyLine(outputLines)
+        print(f'{Tester.OUTPUT}:')
+        for i, line in enumerate(outputLines):
+            if i in differentLines:
+                line = colored(line, 255, 120, 120)
+            print(line)
+
+        if not self.noErr:
+            print(f'{Tester.ERR}:')
+            print(errOutput)
+            if len(errOutput) == 0 or errOutput[-1] != '\n':
+                print()
+
+        if correctOutputLines is not None:
+            print(f'{Tester.EXPECTED_OUTPUT}:')
+            correctOutputLines = Tester.__addEmptyLine(correctOutputLines)
+            for i, line in enumerate(correctOutputLines):
+                if i in differentLines:
+                    line = colored(line, 120, 255, 120)
+                print(line)
+
+    @staticmethod
+    def __dumpSingleTestVerdict(verdict, executionTime) -> None:
+        if verdict == Tester.TestResult.OK:
+            print(Tester.OK, end='')
+        elif verdict == Tester.TestResult.WA:
+            print(Tester.WA, end='')
+        elif verdict == Tester.TestResult.RE:
+            print(Tester.RE, end='')
+        else:
+            print(Tester.UNKNOWN, end='')
+
+        print(f' ({executionTime}ms)')
+
+    def __runSingleTest(self, test) -> TestResult:
+        print('Test ', colored(test.testPath, 255, 255, 50), ': ', sep='', end='', flush=True)
+
+        with open(test.testPath, 'r') as testFile:
+            processStartTime = time.time()
+            processData = subprocess.run([f'./{self.mainExecutable}'],
+                                         stdin=testFile,
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE)
+            executionTime = int((time.time() - processStartTime) * 1000)
+
+        outputLines = processData.stdout.decode().split('\n')
+        errOutput = processData.stderr.decode()
+
+        correctOutputLines = None
+        if test.testAnswer is not None:
+            with open(test.testAnswer, 'r') as testAnswer:
+                correctOutputLines = testAnswer.read().split('\n')
+
+        if processData.returncode != 0:
+            verdict = Tester.TestResult.RE
+        elif test.testAnswer is None:
+            verdict = Tester.TestResult.UNKNOWN
+        elif len(Tester.__compareOutput(outputLines, correctOutputLines)) == 0:
+            verdict = Tester.TestResult.OK
+        else:
+            verdict = Tester.TestResult.WA
+
+        self.__dumpSingleTestVerdict(verdict, executionTime)
+        if verdict != Tester.TestResult.OK:
+            self.__dumpSingleTestOutput(test, outputLines, errOutput, correctOutputLines)
+
+        return verdict
+
+    def __dumpTestsVerdicts(self, verdictsCounter: dict[int: int]) -> None:
+        oks      = verdictsCounter[Tester.TestResult.OK]
+        was      = verdictsCounter[Tester.TestResult.WA]
+        res      = verdictsCounter[Tester.TestResult.RE]
+        unknowns = verdictsCounter[Tester.TestResult.UNKNOWN]
+
+        print(Tester.SEPARATOR)
+        if verdictsCounter[Tester.TestResult.OK] == len(self.tests):
+            print(colored('All tests passed!', 20, 255, 20))
+        else:
+            print(f'{Tester.OK}: {oks}  ',
+                  f'{Tester.WA}: {was}  ',
+                  f'{Tester.RE}: {res}  ',
+                  f'{Tester.UNKNOWN}: {unknowns}')
+
+    def __runTests(self) -> None:
+        verdictsCounter = {Tester.TestResult.OK:      0,
+                           Tester.TestResult.WA:      0,
+                           Tester.TestResult.RE:      0,
+                           Tester.TestResult.UNKNOWN: 0}
+
+        for i, test in enumerate(self.tests):
+            if i != 0:
+                print(Tester.SEPARATOR)
+            status = self.__runSingleTest(test)
+            verdictsCounter[status] += 1
+
+        self.__dumpTestsVerdicts(verdictsCounter)
+
+def main():
+    parser = ArgumentParser()
+    parser.add_argument('exec',
+                        action='store',
+                        metavar='exec',
+                        help='Path to the executable file.')
+
+    parser.add_argument('-ext',
+                        action='store',
+                        metavar='ext',
+                        default='cpp',
+                        help='Extention of the solution file (required for compilation).')
+
+    parser.add_argument('-test',
+                        dest='tests',
+                        nargs='*',
+                        metavar='test',
+                        help='List of tests to run on. ' +
+                             'By default it runs on tests which matches \"in[0-9]+\".')
+
+    parser.add_argument('-compiler',
+                        metavar='compiler',
+                        help='Path to the compiler. ' +
+                             'If not specified, then program will not be compiled.')
+
+    parser.add_argument('-flags',
+                        dest='flags',
+                        nargs='*',
+                        metavar='flags',
+                        default=[],
+                        help='Compilation flags.')
+
+    parser.add_argument('-cmplonly',
+                        action='store_true',
+                        default=False,
+                        help='Add if you want only to compile.')
+
+    parser.add_argument('-noerr',
+                        action='store_true',
+                        default=False,
+                        help='Hide err output.')
+
+    args = parser.parse_args()
+    tester = Tester(args)
+    tester.run()
+
+if __name__ == '__main__':
+    main()
