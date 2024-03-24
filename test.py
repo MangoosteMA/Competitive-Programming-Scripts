@@ -150,7 +150,7 @@ class Tester:
                 line = colored(line, 255, 120, 120)
             print(line)
 
-        if not self.noErr:
+        if not self.noErr and len(errOutput.strip()) > 0:
             print(f'{Tester.ERR}:')
             print(errOutput)
             if len(errOutput) == 0 or errOutput[-1] != '\n':
