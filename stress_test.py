@@ -139,11 +139,6 @@ def main():
                         default=1000,
                         help='Number of tests (1000 by default).')
 
-    parser.add_argument('-no-output',
-                        default=False,
-                        action='store_true',
-                        help='Hides any information about generated test except solution verdict.')
-
     args = parser.parse_args()
     stressTester = StressTester(args)
     stressTester.run()
