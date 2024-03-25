@@ -1,5 +1,6 @@
 class Problem:
-    def __init__(self, title=None, index=None, link=None, tags=None, difficulty=None, inputs=None, outputs=None):
+    def __init__(self, title: str=None, index: str=None, link: str=None, tags: str=None,\
+                 difficulty: int=None, inputs: list[str]=None, outputs: list[str]=None):
         self.title = title
         self.index = index
         self.link = link
