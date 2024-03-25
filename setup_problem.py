@@ -3,12 +3,14 @@ import argparse
 import subprocess
 import sys
 
-from dataclasses            import dataclass
-from typing                 import Optional
-from library.problem        import Problem
-from library.utils          import colored, JudgeSystem, dumpError, getHtml
-from codeforces.get_problem import parseProblemFromHtml as cfParseProblemFromHtml
-from atcoder.get_problem    import parseProblemFromHtml as atcoderParseProblemFromHtml
+from dataclasses                import dataclass
+from typing                     import Optional
+from library.problem            import Problem
+from library.utils              import colored, JudgeSystem, dumpError, getHtml
+
+from codeforces.get_problem     import parseProblemFromHtml as cfParseProblemFromHtml
+from atcoder.get_problem        import parseProblemFromHtml as atcoderParseProblemFromHtml
+from yandex_contest.get_problem import parseProblemFromHtml as yandexParseProblemFromHtml
 
 @dataclass
 class File:
@@ -98,6 +100,9 @@ class ProblemSetter:
         elif judgeSystem == JudgeSystem.ATCODER:
             print('atcoder')
             self.problem = atcoderParseProblemFromHtml(html, link=self.problemUrl)
+        elif judgeSystem == JudgeSystem.YANDEX_CONTEST:
+            print('yandex contest')
+            self.problem = yandexParseProblemFromHtml(html, link=self.problemUrl)
 
         if self.problem is not None and self.problem.index is not None and self.shortName is None:
             self.shortName = self.problem.index
@@ -114,6 +119,7 @@ class ProblemSetter:
             self.__parseHtml(html)
 
     def __createProblemFiles(self) -> None:
+        print(f'Index: {self.shortName}')
         directory = f'./{self.shortName}'
         createProblemFiles(self.problem, self.problemFiles, directory)
 

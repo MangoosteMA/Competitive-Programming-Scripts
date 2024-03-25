@@ -35,17 +35,22 @@ def colorfulLinesPrint(lines: list[str], differentLines: list[int], r: int, g: i
             print(line)
 
 class JudgeSystem(Enum):
-    CODEFORCES = 0
-    ATCODER    = 1
+    CODEFORCES     = 0
+    ATCODER        = 1
+    YANDEX_CONTEST = 2
 
     @staticmethod
     def determineFromHtml(html: str):
         codeforcesCount = html.count('codeforces')
         atcoderCount = html.count('atcoder')
-        if codeforcesCount > atcoderCount:
+        yandexCount = html.count('yandex') + html.count('Yandex')
+
+        if codeforcesCount > max(atcoderCount, yandexCount):
             return JudgeSystem.CODEFORCES
-        elif atcoderCount > codeforcesCount:
+        elif atcoderCount > max(codeforcesCount, yandexCount):
             return JudgeSystem.ATCODER
+        elif yandexCount > max(codeforcesCount, atcoderCount):
+            return JudgeSystem.YANDEX_CONTEST
         else:
             return None
 

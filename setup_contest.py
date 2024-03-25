@@ -81,6 +81,8 @@ class ContestSetter:
         elif judgeSystem == JudgeSystem.ATCODER:
             print('atcoder')
             self.contest = atcoderParseContestFromHtml(html, link=self.contestUrl)
+        elif judgeSystem == JudgeSystem.ATCODER:
+            dumpError('Importing yandex contest is not supported (only single problem so far).')
 
         if self.contest is not None and self.contest is not None and self.contestName is None:
             self.contestName = self.contest.title
