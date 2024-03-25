@@ -1,69 +1,119 @@
-import sys
+import os
 import argparse
 import subprocess
+import sys
 
+from dataclasses            import dataclass
+from typing                 import Optional
 from library.problem        import Problem
-from library.utils          import determine_system, colored, determine_system_from_html
-from codeforces.get_problem import get_problem_from_args as cf_get_problem_from_args
-from atcoder.get_problem    import get_problem_from_args as atcoder_get_problem_from_args
+from library.utils          import colored, JudgeSystem, dumpError, getHtml
+from codeforces.get_problem import parseProblemFromHtml as cfParseProblemFromHtml
+from atcoder.get_problem    import parseProblemFromHtml as atcoderParseProblemFromHtml
 
-def create_file(file, data):
-    with open(file, 'w') as f:
-        print(data, file=f)
+@dataclass
+class ProblemFile:
+    fileName:     str
+    templatePath: str
 
-def setup_problem(problem, directory='.', extra_files=None):
-    assert problem.index is not None
-    subprocess.run(['rm', '-r', f'{directory}/{problem.index}'], capture_output=True)
-    subprocess.run(['mkdir', f'{directory}/{problem.index}'])
-    if problem.inputs is not None:
-        for test in range(len(problem.inputs)):
-            create_file(f'{directory}/{problem.index}/in{test + 1}', problem.inputs[test])
-            create_file(f'{directory}/{problem.index}/out{test + 1}', problem.outputs[test])
+class ProblemSetter:
+    '''
+    Variables:
+    problemUrl:   str or None
+    shortName:    str or None
+    htmlPath:     str or None
+    saveHtml:     bool
+    problemFiles: list[ProblemFile]
+    problem:      Problem or None
+    '''
 
-    if extra_files is not None:
-        for file_name, template in extra_files:
-            subprocess.run(['cp', '-r', template, f'{directory}/{problem.index}/{file_name}'])
+    def __init__(self, args):
+        self.problemUrl = args.url
+        self.shortName = args.index
+        self.htmlPath = args.html
+        self.saveHtml = args.saveHtml
+        self.__parseProblemFiles(args)
 
-def setup_problem_from_args(args):
-    if args.html_code is not None:
-        f = open(args.html_code, 'r')
-        if not args.keep_html:
-            subprocess.run(['rm', f'{args.html_code}'], capture_output=True)
-        args.html_code = f.read()
-        f.close()
+    def run(self) -> None:
+        self.problem = Problem()
+        self.__handleHtml()
 
-    problem = Problem()
-    if args.url is not None or args.html_code is not None:
-        if args.url is not None:
-            system = determine_system(args.url)
-        else:
-            system = determine_system_from_html(args.html_code)
+        if self.shortName is None:
+            dumpError('Failed to parse problem short name.')
+            return
 
-        print(f'Judge system: {system}')
-        if system == 'codeforces':
-            problem = cf_get_problem_from_args(args)
-        elif system == 'atcoder':
-            problem = atcoder_get_problem_from_args(args)
-        else:
-            print(f'System \'{system}\' is not avaliable yet.')
-            sys.exit(0)
+        self.__createProblemFiles()
 
-        if problem is None:
-            print(colored('Failed', 255, 0, 0), 'to load the problem.')
-            sys.exit(0)
-    else:
-        print('No url was given.')
+# Private:
 
-    if args.index is not None:
-        problem.index = args.index
+    def __parseProblemFiles(self, args) -> None:
+        self.problemFiles = []
+        for fileName, templatePath in args.problemFiles:
+            if not os.path.isfile(templatePath):
+                dumpError(f'No such file: {templatePath}')
+            else:
+                self.problemFiles.append(ProblemFile(fileName=fileName, templatePath=templatePath))
+    
+    def __loadHtml(self) -> Optional[str]:
+        if not os.path.isfile(self.htmlPath):
+            dumpError(f'No such file: {self.htmlPath}')
+            return None
 
-    if problem.index is None:
-        print(colored('Failed', 255, 0, 0), 'to load the problem index.')
-        sys.exit(0)
+        with open(self.htmlPath, 'r') as htmlFile:
+            htmlData = htmlFile.read()
 
-    setup_problem(problem, extra_files=args.problem_files)
-    n_tests =  0 if problem.inputs is None else len(problem.inputs)
-    print(f'Tests created: {n_tests}')
+        if not self.saveHtml:
+            os.remove(self.htmlPath)
+
+        return htmlData
+
+    def __parseHtml(self, html: str) -> None:
+        judgeSystem = JudgeSystem.determineFromHtml(html)
+        if judgeSystem is None:
+            dumpError('Failed to determine judge system.')
+            return
+
+        print('Judge system: ', end='')
+        if judgeSystem == JudgeSystem.CODEFORCES:
+            print('codeforces')
+            self.problem = cfParseProblemFromHtml(html, link=self.problemUrl)
+        elif judgeSystem == JudgeSystem.ATCODER:
+            print('atcoder')
+            self.problem = atcoderParseProblemFromHtml(html, link=self.problemUrl)
+
+    def __handleHtml(self) -> None:
+        html = None
+        if self.htmlPath is not None:
+            html = self.__loadHtml()
+
+        if html is None and self.problemUrl is not None:
+            html = getHtml(self.problemUrl)
+
+        if html is not None:
+            self.__parseHtml(html)
+
+    def __createSingleFile(self, filePath: str, fileData: str) -> None:
+        with open(filePath, 'w') as file:
+            print(fileData, file=file)
+
+    def __createTests(self, directory: str) -> None:
+        if self.problem.inputs is None:
+            return
+        
+        for testIndex in range(0, len(self.problem.inputs)):
+            self.__createSingleFile(f'{directory}/in{testIndex + 1}', self.problem.inputs[testIndex])
+            self.__createSingleFile(f'{directory}/out{testIndex + 1}', self.problem.outputs[testIndex])
+        
+    def __createProblemFiles(self) -> None:
+        directory = f'./{self.shortName}'
+        subprocess.run(['rm', '-r', directory])
+        os.mkdir(directory)
+
+        self.__createTests(directory)
+        for problemFile in self.problemFiles:
+            subprocess.run(['cp', '-r', problemFile.templatePath, f'{directory}/{problemFile.fileName}'])
+
+        testsCreated = 0 if self.problem.inputs is None else len(self.problem.inputs)
+        print(f'Tests created: {testsCreated}')
 
 def main():
     parser = argparse.ArgumentParser(description='Problem arguments parser.')
@@ -77,32 +127,29 @@ def main():
                         dest='index',
                         metavar='index',
                         default=None,
-                        help='Index of the problem.')
+                        help='Problem short name.')
 
-    parser.add_argument('-problem_file',
-                        dest='problem_files',
+    parser.add_argument('-problem-file',
+                        dest='problemFiles',
                         nargs=2,
                         action='append',
-                        metavar=('file_name', 'file_template'),
-                        help='Add file inside the problem (copies from file_template).')
+                        metavar=('file-name', 'file-template'),
+                        help='File to be created (copy of file-template).')
 
-    parser.add_argument('-selenium',
-                        action='store_true',
-                        default=False,
-                        help='Add if you want only to use selenium (useful only during the contest).')
-
-    parser.add_argument('-html_code',
+    parser.add_argument('-html',
                         action='store',
                         default=None,
                         help='Path to the files that contains problem html.')
 
-    parser.add_argument('-keep_html',
+    parser.add_argument('-save-html',
                         action='store_true',
+                        dest='saveHtml',
                         default=False,
-                        help='Set in case you want to keep html file.')
+                        help='Don\'t delete html file.')
 
-    setup_problem_from_args(parser.parse_args())
-
+    args = parser.parse_args()
+    problemSetter = ProblemSetter(args)
+    problemSetter.run()
 
 if __name__ == '__main__':
     main()

@@ -5,10 +5,9 @@ from bs4 import BeautifulSoup
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from library.utils       import colored, set_language, get_html_code
+from library.utils       import colored, set_language, getHtml
 from atcoder.get_problem import get_problem_index_and_title, parse_problem_from_html
 from library.contest     import Contest
-
 
 def parse_contest_from_html(html_code, link=None):
     soup = BeautifulSoup(html_code, 'html.parser')
@@ -25,7 +24,7 @@ def parse_contest_from_html(html_code, link=None):
     return Contest(title=contest_title, link=link, problems=problems)
 
 def get_contest(url, use_selenium=False):
-    html_code = get_html_code(set_language(url, 'lang', 'en'), use_selenium=use_selenium)
+    html_code = getHtml(set_language(url, 'lang', 'en'), use_selenium=use_selenium)
     if html_code is None:
         return None
 

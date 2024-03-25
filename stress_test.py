@@ -83,7 +83,7 @@ class StressTester:
                                              stdin=testFile,
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE)
-        
+
         if bruteRunResult.returncode != 0:
             dumpError('\nBrute force solution got RE.')
             self.__dumpTest()

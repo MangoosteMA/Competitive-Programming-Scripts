@@ -1,24 +1,10 @@
 alias setup_problem='python3 ~/Programming/Competitive-Programming-Scripts/setup_problem.py\
- -problem_file a.cpp ~/Programming/Algorithm-Library/template_multitest.cpp\
- -problem_file debug.h ~/Programming/Algorithm-Library/debug.h\
- -problem_file .vscode ~/Programming/Codeforces/.vscode\
- -selenium'
-
-alias fast_setup_problem='python3 ~/Programming/Competitive-Programming-Scripts/setup_problem.py\
- -problem_file a.cpp ~/Programming/Algorithm-Library/template_multitest.cpp\
- -problem_file debug.h ~/Programming/Algorithm-Library/debug.h\
- -problem_file .vscode ~/Programming/Codeforces/.vscode'
+ -problem-file a.cpp ~/Programming/Algorithm-Library/template_multitest.cpp\
+ -problem-file debug.h ~/Programming/Algorithm-Library/debug.h'
 
 alias setup_contest='python3 ~/Programming/Competitive-Programming-Scripts/setup_contest.py\
- -problem_file a.cpp ~/Programming/Algorithm-Library/template_multitest.cpp\
- -problem_file debug.h ~/Programming/Algorithm-Library/debug.h\
- -contest_file .vscode ~/Programming/Codeforces/.vscode\
- -selenium'
-
-alias fast_setup_contest='python3 ~/Programming/Competitive-Programming-Scripts/setup_contest.py\
- -problem_file a.cpp ~/Programming/Algorithm-Library/template_multitest.cpp\
- -problem_file debug.h ~/Programming/Algorithm-Library/debug.h\
- -contest_file .vscode ~/Programming/Codeforces/.vscode'
+ -problem-file a.cpp ~/Programming/Algorithm-Library/template_multitest.cpp\
+ -problem-file debug.h ~/Programming/Algorithm-Library/debug.h'
 
 alias drun='python3 ~/Programming/Competitive-Programming-Scripts/test.py'
 

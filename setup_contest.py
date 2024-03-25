@@ -3,7 +3,7 @@ import argparse
 import subprocess
 
 from library.contest        import Contest
-from library.utils          import determine_system, colored, determine_system_from_html
+from library.utils          import determineJudgeSystemFromUrl, colored, determineJudgeSystemFromHtml
 from codeforces.get_contest import get_contest_from_args as cf_get_contest_from_args
 from atcoder.get_contest    import get_contest_from_args as atcoder_get_contest_from_args
 from setup_problem          import setup_problem
@@ -33,9 +33,9 @@ def setup_contest_from_args(args):
     contest = Contest()
     if args.url is not None or args.html_code is not None:
         if args.url is not None:
-            system = determine_system(args.url)
+            system = determineJudgeSystemFromUrl(args.url)
         else:
-            system = determine_system_from_html(args.html_code)
+            system = determineJudgeSystemFromHtml(args.html_code)
 
         print(f'Judge system: {system}')
         if system == 'codeforces':
@@ -65,7 +65,7 @@ def main():
                         default=None,
                         help='Link to the problems of the contest.')
 
-    parser.add_argument('-problem_file',
+    parser.add_argument('-problem-file',
                         dest='problem_files',
                         nargs=2,
                         action='append',

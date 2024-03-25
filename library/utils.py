@@ -1,3 +1,8 @@
+import requests
+
+from enum   import Enum
+from typing import Optional
+
 def compareOutput(outputLines: list[str], correctOutputLines: list[str]) -> list[int]:
     if correctOutputLines is None or outputLines is None:
         return []
@@ -29,6 +34,31 @@ def colorfulLinesPrint(lines: list[str], differentLines: list[int], r: int, g: i
         else:
             print(line)
 
+class JudgeSystem(Enum):
+    CODEFORCES = 0
+    ATCODER    = 1
+
+    @staticmethod
+    def determineFromHtml(html: str):
+        codeforcesCount = html.count('codeforces')
+        atcoderCount = html.count('atcoder')
+        if codeforcesCount > atcoderCount:
+            return JudgeSystem.CODEFORCES
+        elif atcoderCount > codeforcesCount:
+            return JudgeSystem.ATCODER
+        else:
+            return None
+
+def colored(text: str, red: int, green: int, blue: int) -> str:
+    return f'\033[38;2;{red};{green};{blue}m{text}\033[0m'
+
+def dumpError(message: str) -> None:
+    print(colored(message, 255, 70, 0))
+
+def getHtml(url: str) -> Optional[str]:
+    result = requests.get(url)
+    return None if result.status_code != 200 else result.text
+
 def set_language(link, lang_flag, lang='en'):
     pos = link.find(lang_flag)
     if pos == -1:
@@ -36,46 +66,3 @@ def set_language(link, lang_flag, lang='en'):
     pos += len(lang_flag) + 1
     assert link[pos - 1] == '='
     return link[:pos] + lang
-
-def determine_system(link):
-    if link.find('codeforces') != -1:
-        return 'codeforces'
-    elif link.find('atcoder') != -1:
-        return 'atcoder'
-    else:
-        return None
-
-def determine_system_from_html(html_code):
-    codeforces_count = html_code.count('codeforces')
-    atcoder_count = html_code.count('atcoder')
-    if codeforces_count > atcoder_count:
-        return 'codeforces'
-    elif atcoder_count > codeforces_count:
-        return 'atcoder'
-    else:
-        return None
-
-def colored(text, red, green, blue):
-    return f'\033[38;2;{red};{green};{blue}m{text}\033[0m'
-
-def dumpError(message):
-    print(colored(message, 255, 70, 0))
-
-def get_html_code(url, use_selenium=False):
-    if not use_selenium:
-        import requests
-        result = requests.get(url)
-        return None if result.status_code != 200 else result.text
-    else:
-        from selenium import webdriver
-        from selenium.webdriver.chrome.options import Options
-        print('Creating driver.')
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options)
-        print('Requesting data.')
-        driver.get(url)
-        html_code = driver.page_source
-        driver.close()
-        print('Got html code!')
-        return html_code
