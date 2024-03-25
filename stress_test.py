@@ -32,6 +32,8 @@ parser.add_argument('-no_output',
 
 args = parser.parse_args()
 
+print("\033[?25l", end='')
+
 TEST_NAME = 'in_stress'
 for test_num in range(1, args.tests + 1):
     print(colored('\rTesting on test #', 255, 255, 50), colored(str(test_num), 0, 200, 200), sep='', end='')
