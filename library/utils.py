@@ -1,3 +1,34 @@
+def compareOutput(outputLines: list[str], correctOutputLines: list[str]) -> list[int]:
+    if correctOutputLines is None or outputLines is None:
+        return []
+
+    differentLines = []
+    for i in range(0, max(len(outputLines), len(correctOutputLines))):
+        outputLine = outputLines[i] if i < len(outputLines) else ''
+        correctLine = correctOutputLines[i] if i < len(correctOutputLines) else ''
+        if outputLine.strip() != correctLine.strip():
+            differentLines.append(i)
+    
+    return differentLines
+
+def addEmptyLine(lines: list[str]) -> list[str]:
+    clone = [line for line in lines]
+    if len(clone) == 0 or len(clone[-1]) != 0:
+        clone.append('')
+    return clone
+
+def colorfulLinesPrint(lines: list[str], differentLines: list[int], r: int, g: int, b: int) -> None:
+    differentLines.sort()
+    linePtr = 0
+    for i, line in enumerate(lines):
+        while linePtr < len(differentLines) and differentLines[linePtr] < i:
+            linePtr += 1
+
+        if linePtr < len(differentLines) and differentLines[linePtr] == i:
+            print(colored(line, r, g, b))
+        else:
+            print(line)
+
 def set_language(link, lang_flag, lang='en'):
     pos = link.find(lang_flag)
     if pos == -1:

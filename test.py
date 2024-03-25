@@ -7,14 +7,31 @@ import time
 from enum          import Enum
 from dataclasses   import dataclass
 from argparse      import ArgumentParser
-from library.utils import colored, dumpError
+from library.utils import colored, dumpError, compareOutput, addEmptyLine, colorfulLinesPrint
+
+@dataclass
+class Test:
+    testPath:   str
+    testAnswer: str
+
+    def getTestIndex(self) -> int:
+        indexStart = self.testPath.find('in')
+        if indexStart == -1:
+            return -1
+        return int(self.testPath[indexStart + 2:])
+
+class TestResult(Enum):
+    OK      = 0
+    WA      = 1
+    RE      = 2
+    UNKNOWN = 3
 
 class Tester:
     '''
     Variables:
     mainExecutable:   str
     extention:        str
-    tests:            list[Tester.Test]
+    tests:            list[Test]
     compileOnly:      bool
     compilerPath:     str or None
     compilationFlags: list[str] or NOne
@@ -22,7 +39,7 @@ class Tester:
     '''
 
     TEST_NAME_REGEX = re.compile('in[0-9]+')
-    SEPARATOR = '=============================================='
+    SEPARATOR = '==========================================='
 
     OK = colored('OK', 20, 255, 20)
     WA = colored('WA', 255, 70, 0)
@@ -32,23 +49,6 @@ class Tester:
     OUTPUT = colored('Output', 255, 165, 0)
     EXPECTED_OUTPUT = colored('Expected output', 255, 165, 0)
     ERR = colored('Err', 255, 165, 0)
-
-    @dataclass
-    class Test:
-        testPath:   str
-        testAnswer: str
-
-        def getTestIndex(self) -> int:
-            indexStart = self.testPath.find('in')
-            if indexStart == -1:
-                return -1
-            return int(self.testPath[indexStart + 2:])
-
-    class TestResult(Enum):
-        OK      = 0
-        WA      = 1
-        RE      = 2
-        UNKNOWN = 3
 
     def __init__(self, args):
         self.mainExecutable = args.exec
@@ -86,7 +86,7 @@ class Tester:
         if answerFileName in os.listdir('./' if len(directory) == 0 else directory):
             testAnswer = os.path.join(directory, answerFileName)
 
-        self.tests.append(Tester.Test(testPath=testPath, testAnswer=testAnswer))
+        self.tests.append(Test(testPath=testPath, testAnswer=testAnswer))
 
     def __registerTests(self, testsNames: list[str] or None) -> None:
         self.tests = []
@@ -117,38 +117,14 @@ class Tester:
 
         print(colored('Compiled successfully.', 20, 255, 20), f'({compilationTime}ms)')
 
-    @staticmethod
-    def __compareOutput(outputLines, correctOutputLines) -> list[int]:
-        if correctOutputLines is None:
-            return []
-
-        differentLines = []
-        for i in range(0, max(len(outputLines), len(correctOutputLines))):
-            outputLine = outputLines[i] if i < len(outputLines) else ''
-            correctLine = correctOutputLines[i] if i < len(correctOutputLines) else ''
-            if outputLine.strip() != correctLine.strip():
-                differentLines.append(i)
-        
-        return differentLines
-
-    @staticmethod
-    def __addEmptyLine(lines: list[str]) -> list[str]:
-        if len(lines) == 0 or len(lines[-1]) != 0:
-            lines.append('')
-        return lines
-
-    def __dumpSingleTestOutput(self, test, outputLines, errOutput, correctOutputLines) -> None:
+    def __dumpSingleTestOutput(self, test: Test, outputLines: list[str], errOutput: str, correctOutputLines: list[str]) -> None:
         with open(test.testPath, 'r') as testFile:
             print(testFile.read())
 
-        differentLines = self.__compareOutput(outputLines, correctOutputLines)
-
-        outputLines = Tester.__addEmptyLine(outputLines)
+        differentLines = compareOutput(outputLines, correctOutputLines)
+        outputLines = addEmptyLine(outputLines)
         print(f'{Tester.OUTPUT}:')
-        for i, line in enumerate(outputLines):
-            if i in differentLines:
-                line = colored(line, 255, 120, 120)
-            print(line)
+        colorfulLinesPrint(outputLines, differentLines, 255, 120, 120)
 
         if not self.noErr and len(errOutput.strip()) > 0:
             print(f'{Tester.ERR}:')
@@ -158,26 +134,23 @@ class Tester:
 
         if correctOutputLines is not None:
             print(f'{Tester.EXPECTED_OUTPUT}:')
-            correctOutputLines = Tester.__addEmptyLine(correctOutputLines)
-            for i, line in enumerate(correctOutputLines):
-                if i in differentLines:
-                    line = colored(line, 120, 255, 120)
-                print(line)
+            correctOutputLines = addEmptyLine(correctOutputLines)
+            colorfulLinesPrint(correctOutputLines, differentLines, 120, 255, 120)
 
     @staticmethod
-    def __dumpSingleTestVerdict(verdict, executionTime) -> None:
-        if verdict == Tester.TestResult.OK:
+    def __dumpSingleTestVerdict(verdict: TestResult, executionTime: int) -> None:
+        if verdict == TestResult.OK:
             print(Tester.OK, end='')
-        elif verdict == Tester.TestResult.WA:
+        elif verdict == TestResult.WA:
             print(Tester.WA, end='')
-        elif verdict == Tester.TestResult.RE:
+        elif verdict == TestResult.RE:
             print(Tester.RE, end='')
         else:
             print(Tester.UNKNOWN, end='')
 
         print(f' ({executionTime}ms)')
 
-    def __runSingleTest(self, test) -> TestResult:
+    def __runSingleTest(self, test: Test) -> TestResult:
         print('Test ', colored(test.testPath, 255, 255, 50), ': ', sep='', end='', flush=True)
 
         with open(test.testPath, 'r') as testFile:
@@ -197,28 +170,28 @@ class Tester:
                 correctOutputLines = testAnswer.read().split('\n')
 
         if processData.returncode != 0:
-            verdict = Tester.TestResult.RE
+            verdict = TestResult.RE
         elif test.testAnswer is None:
-            verdict = Tester.TestResult.UNKNOWN
-        elif len(Tester.__compareOutput(outputLines, correctOutputLines)) == 0:
-            verdict = Tester.TestResult.OK
+            verdict = TestResult.UNKNOWN
+        elif len(compareOutput(outputLines, correctOutputLines)) == 0:
+            verdict = TestResult.OK
         else:
-            verdict = Tester.TestResult.WA
+            verdict = TestResult.WA
 
         self.__dumpSingleTestVerdict(verdict, executionTime)
-        if verdict != Tester.TestResult.OK:
+        if verdict != TestResult.OK:
             self.__dumpSingleTestOutput(test, outputLines, errOutput, correctOutputLines)
 
         return verdict
 
     def __dumpTestsVerdicts(self, verdictsCounter: dict[int: int]) -> None:
-        oks      = verdictsCounter[Tester.TestResult.OK]
-        was      = verdictsCounter[Tester.TestResult.WA]
-        res      = verdictsCounter[Tester.TestResult.RE]
-        unknowns = verdictsCounter[Tester.TestResult.UNKNOWN]
+        oks      = verdictsCounter[TestResult.OK]
+        was      = verdictsCounter[TestResult.WA]
+        res      = verdictsCounter[TestResult.RE]
+        unknowns = verdictsCounter[TestResult.UNKNOWN]
 
         print(Tester.SEPARATOR)
-        if verdictsCounter[Tester.TestResult.OK] == len(self.tests):
+        if verdictsCounter[TestResult.OK] == len(self.tests):
             print(colored('All tests passed!', 20, 255, 20))
         else:
             print(f'{Tester.OK}: {oks}  ',
@@ -227,10 +200,10 @@ class Tester:
                   f'{Tester.UNKNOWN}: {unknowns}')
 
     def __runTests(self) -> None:
-        verdictsCounter = {Tester.TestResult.OK:      0,
-                           Tester.TestResult.WA:      0,
-                           Tester.TestResult.RE:      0,
-                           Tester.TestResult.UNKNOWN: 0}
+        verdictsCounter = {TestResult.OK:      0,
+                           TestResult.WA:      0,
+                           TestResult.RE:      0,
+                           TestResult.UNKNOWN: 0}
 
         for i, test in enumerate(self.tests):
             if i != 0:
