@@ -11,9 +11,28 @@ from codeforces.get_problem import parseProblemFromHtml as cfParseProblemFromHtm
 from atcoder.get_problem    import parseProblemFromHtml as atcoderParseProblemFromHtml
 
 @dataclass
-class ProblemFile:
+class File:
     fileName:     str
     templatePath: str
+
+def createSingleFile(filePath: str, fileData: str) -> None:
+    with open(filePath, 'w') as file:
+        print(fileData, file=file)
+
+def createProblemFiles(problem: Problem, problemFiles: list[File], directory: str) -> None:
+    subprocess.run(['rm', '-r', directory], capture_output=True)
+    os.mkdir(directory)
+
+    if problem.inputs is not None:
+        for testIndex in range(0, len(problem.inputs)):
+            createSingleFile(f'{directory}/in{testIndex + 1}', problem.inputs[testIndex])
+            createSingleFile(f'{directory}/out{testIndex + 1}', problem.outputs[testIndex])
+
+    for problemFile in problemFiles:
+        subprocess.run(['cp', '-r', problemFile.templatePath, f'{directory}/{problemFile.fileName}'])
+
+    testsCreated = 0 if problem.inputs is None else len(problem.inputs)
+    print(f'Tests created: {testsCreated}')
 
 class ProblemSetter:
     '''
@@ -22,7 +41,7 @@ class ProblemSetter:
     shortName:    str or None
     htmlPath:     str or None
     saveHtml:     bool
-    problemFiles: list[ProblemFile]
+    problemFiles: list[File]
     problem:      Problem or None
     '''
 
@@ -51,7 +70,7 @@ class ProblemSetter:
             if not os.path.isfile(templatePath):
                 dumpError(f'No such file: {templatePath}')
             else:
-                self.problemFiles.append(ProblemFile(fileName=fileName, templatePath=templatePath))
+                self.problemFiles.append(File(fileName=fileName, templatePath=templatePath))
     
     def __loadHtml(self) -> Optional[str]:
         if not os.path.isfile(self.htmlPath):
@@ -80,6 +99,9 @@ class ProblemSetter:
             print('atcoder')
             self.problem = atcoderParseProblemFromHtml(html, link=self.problemUrl)
 
+        if self.problem is not None and self.problem.index is not None and self.shortName is None:
+            self.shortName = self.problem.index
+
     def __handleHtml(self) -> None:
         html = None
         if self.htmlPath is not None:
@@ -91,29 +113,10 @@ class ProblemSetter:
         if html is not None:
             self.__parseHtml(html)
 
-    def __createSingleFile(self, filePath: str, fileData: str) -> None:
-        with open(filePath, 'w') as file:
-            print(fileData, file=file)
-
-    def __createTests(self, directory: str) -> None:
-        if self.problem.inputs is None:
-            return
-        
-        for testIndex in range(0, len(self.problem.inputs)):
-            self.__createSingleFile(f'{directory}/in{testIndex + 1}', self.problem.inputs[testIndex])
-            self.__createSingleFile(f'{directory}/out{testIndex + 1}', self.problem.outputs[testIndex])
-        
     def __createProblemFiles(self) -> None:
         directory = f'./{self.shortName}'
-        subprocess.run(['rm', '-r', directory], capture_output=True)
-        os.mkdir(directory)
+        createProblemFiles(self.problem, self.problemFiles, directory)
 
-        self.__createTests(directory)
-        for problemFile in self.problemFiles:
-            subprocess.run(['cp', '-r', problemFile.templatePath, f'{directory}/{problemFile.fileName}'])
-
-        testsCreated = 0 if self.problem.inputs is None else len(self.problem.inputs)
-        print(f'Tests created: {testsCreated}')
 
 def main():
     parser = argparse.ArgumentParser(description='Problem arguments parser.')
