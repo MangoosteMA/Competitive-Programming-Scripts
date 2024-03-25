@@ -13,7 +13,7 @@ def compareOutput(outputLines: list[str], correctOutputLines: list[str]) -> list
         correctLine = correctOutputLines[i] if i < len(correctOutputLines) else ''
         if outputLine.strip() != correctLine.strip():
             differentLines.append(i)
-    
+
     return differentLines
 
 def addEmptyLine(lines: list[str]) -> list[str]:
@@ -58,11 +58,3 @@ def dumpError(message: str) -> None:
 def getHtml(url: str) -> Optional[str]:
     result = requests.get(url)
     return None if result.status_code != 200 else result.text
-
-def set_language(link, lang_flag, lang='en'):
-    pos = link.find(lang_flag)
-    if pos == -1:
-        return link + '?' + lang_flag + '=' + lang
-    pos += len(lang_flag) + 1
-    assert link[pos - 1] == '='
-    return link[:pos] + lang
