@@ -1,140 +1,206 @@
+import os
 import subprocess
+import time
+
+from argparse  import ArgumentParser
 from queue     import Queue
 from threading import Thread
-from argparse  import ArgumentParser
-from time      import time
+from typing    import Optional
 
-from library.utils import colored
-
-parser = ArgumentParser()
-parser.add_argument('-solve',
-                    action='store',
-                    required=True,
-                    help='Path to the executable solution.')
-
-parser.add_argument('-interactor',
-                    action='store',
-                    required=True,
-                    help='Path to the executable interactor.')
-
-parser.add_argument('-timeout',
-                    action='store',
-                    type=float,
-                    required=False,
-                    default=10,
-                    help='Timeout in seconds.')
-
-parser.add_argument('-input',
-                    action='store',
-                    required=False,
-                    help='Path to the input file for interactor.')
-
-args = parser.parse_args()
-solve_exec = args.solve
-interactor_exec = args.interactor
-
+from library.utils import colored, dumpError
 
 class ExecutingPopen:
-    @staticmethod
-    def read_loop(stream, queue):
-        for line in iter(stream.readline, b''):
-            queue.put(line.decode())
-        stream.close()
+    '''
+    Variables:
+    runningPopen:   subprocess.Popen
+    poll:           int or None
+    readingThreads: dict[str, Thread]
+    readingQueues:  dict[str, Queue]
+    '''
 
-    def __init__(self, executable_file):
-        self.running_popen = subprocess.Popen([f'./{executable_file}'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def __init__(self, executableFile: str):
+        self.runningPopen = subprocess.Popen([f'./{executableFile}'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.poll = None
-        self.reading_threads = dict()
-        self.reading_queues = dict()
-        for stream_type, stream in zip(['stdout', 'stderr'], [self.running_popen.stdout, self.running_popen.stderr]):
-            self.reading_queues[stream_type] = Queue()
-            self.reading_threads[stream_type] = Thread(target=self.read_loop, args=(stream, self.reading_queues[stream_type]))
-            self.reading_threads[stream_type].start()
+        self.readingThreads = dict()
+        self.readingQueues = dict()
 
-    def is_running(self):
-        self.poll = self.running_popen.poll()
+        for streamType, stream in zip(['stdout', 'stderr'], [self.runningPopen.stdout, self.runningPopen.stderr]):
+            self.readingQueues[streamType] = Queue()
+            self.readingThreads[streamType] = Thread(target=ExecutingPopen.__readLoop, args=(stream, self.readingQueues[streamType]))
+            self.readingThreads[streamType].start()
+
+    def isRunning(self) -> bool:
+        self.poll = self.runningPopen.poll()
         return self.poll is None
 
-    def get_line(self, stream):
-        assert stream in self.reading_queues
-        if self.reading_queues[stream].empty():
+    def getLine(self, stream: str) -> Optional[str]:
+        if self.readingQueues[stream].empty():
             return None
-        return self.reading_queues[stream].get()
 
-    def communicate(self, new_line):
-        if self.is_running():
-            self.running_popen.stdin.write(new_line.encode())
-            self.running_popen.stdin.flush()
+        return self.readingQueues[stream].get()
 
-    def any_thread_alive(self):
-        for stream_type, thread in self.reading_threads.items():
+    def communicate(self, newLine: str) -> None:
+        if self.isRunning():
+            self.runningPopen.stdin.write(newLine.encode())
+            self.runningPopen.stdin.flush()
+
+    def anyThreadAlive(self) -> bool:
+        for streamType, thread in self.readingThreads.items():
             if thread.is_alive():
                 return True
+
         return False
 
     def terminate(self):
-        self.running_popen.terminate()
+        self.runningPopen.terminate()
 
+# Private:
 
-solve_process = ExecutingPopen(solve_exec)
-interactor_process = ExecutingPopen(interactor_exec)
+    @staticmethod
+    def __readLoop(stream, queue: Queue) -> None:
+        for line in iter(stream.readline, b''):
+            queue.put(line.decode())
 
-if args.input is not None:
-    with open(args.input, 'r') as file:
-        for line in file:
-            interactor_process.communicate(line)
+        stream.close()
 
-solve_unprocess_output = ''
-interactor_unprocess_output = ''
-INTERACTOR_SEPARATOR = '---------------------------------------: '
+class Interactor:
+    '''
+    Variables:
+    solutionExecutable:   str
+    interactorExecutable: str
+    timeout:              float
+    inputFile:            str or None
+    '''
 
-def process_stderr():
-    while True:
-        new_line = solve_process.get_line('stderr')
-        if new_line is None:
-            break
-        print(colored('Solve err: ' + new_line, 255, 70, 0), end='')
+    INTERACTION_HEADER = '+-------------------------------------------+\n' +\
+                         '|      Solution        |     Interactor     |\n' +\
+                         '+-------------------------------------------+'
+    PADDING        = len('........................')
 
-    while True:
-        new_line = interactor_process.get_line('stderr')
-        if new_line is None:
-            break
-        print(colored('Interactor err: ' + new_line, 255, 150, 50), end='')
+    def __init__(self, args):
+        self.solutionExecutable = args.solution
+        self.interactorExecutable = args.interactor
+        self.timeout = args.timeout
 
+        if self.__checkFile(args.input):
+            self.inputFile = args.input
 
-exit_error = None
-start_time = time()
+        if not self.__checkFile(self.solutionExecutable) or\
+           not self.__checkFile(self.interactorExecutable):
+            sys.exit(0)
 
-while solve_process.is_running() or interactor_process.is_running():
-    process_stderr()
+    def run(self) -> None:
+        print(Interactor.INTERACTION_HEADER.replace('Interactor', colored('Interactor', 255, 255, 0)))
+        self.__communicatingLoop()
 
-    if time() - start_time > args.timeout:
-        exit_error = f'Termiating interaction due to the timeout ({args.timeout} seconds).'
-        break
+# Private:
 
-    if not solve_process.is_running() and solve_process.poll != 0:
-        exit_error = 'Solution got RE.'
-        break
+    @staticmethod
+    def __checkFile(fileName: str) -> bool:
+        if os.path.isfile(fileName):
+            return True
 
-    if not interactor_process.is_running() and interactor_process.poll != 0:
-        exit_error = 'Interactor got RE.'
-        break
+        dumpError(f'No such file: {fileName}')
+        return False
 
-    solve_unprocess_output = solve_process.get_line('stdout')
-    interactor_unprocess_output = interactor_process.get_line('stdout')
+    @staticmethod
+    def __printWithSeparator(line: str, padding: int, r: Optional[int], g: Optional[int], b: Optional[int]) -> None:
+        if r is None or g is None or b is None:
+            print(' ' * padding, line, sep='', end='', flush=True)
+        else:
+            print(' ' * padding, colored(line, r, g, b), sep='', end='', flush=True)
 
-    if solve_unprocess_output is not None:
-        print(colored(solve_unprocess_output, 255, 255, 255), end='')
-        interactor_process.communicate(solve_unprocess_output)
-    elif interactor_unprocess_output is not None:
-        print(colored(INTERACTOR_SEPARATOR + interactor_unprocess_output, 255, 255, 0), end='')
-        solve_process.communicate(interactor_unprocess_output)
+    def __openInputFile(self, interactorPopen: ExecutingPopen) -> None:
+        if self.inputFile is None:
+            return
+        
+        with open(self.inputFile, 'r') as inputFile:
+            for line in inputFile:
+                interactorPopen.communicate(line)
 
-solve_process.terminate()
-interactor_process.terminate()
+    def __processSingleStderr(self, popen: ExecutingPopen, padding, r: Optional[int], g: Optional[int], b: Optional[int]) -> None:
+        while True:
+            newLine = popen.getLine('stderr')
+            if newLine is None:
+                break
 
-while solve_process.any_thread_alive() or solve_process.any_thread_alive():
-    process_stderr()
+            self.__printWithSeparator(newLine, padding, r, g, b)
 
-if exit_error is not None:
-    print(colored('\n' + exit_error, 255, 70, 0))
+    def __processStderr(self, solutionPopen: ExecutingPopen, interactorPopen: ExecutingPopen) -> None:
+        self.__processSingleStderr(solutionPopen, 0, None, None, None)
+        self.__processSingleStderr(interactorPopen, Interactor.PADDING, 255, 255, 0)
+
+    def __finish(self, solutionPopen: ExecutingPopen, interactorPopen: ExecutingPopen, exitError: Optional[str]) -> None:
+        solutionPopen.terminate()
+        interactorPopen.terminate()
+        while solutionPopen.anyThreadAlive() or interactorPopen.anyThreadAlive():
+            self.__processStderr(solutionPopen, interactorPopen)
+
+        if exitError is not None:
+            dumpError(exitError)
+
+    def __communicatingLoop(self) -> None:
+        solutionPopen = ExecutingPopen(self.solutionExecutable)
+        interactorPopen = ExecutingPopen(self.interactorExecutable)
+        self.__openInputFile(interactorPopen)
+
+        exitError = None
+        startTime = time.time()
+
+        while solutionPopen.isRunning() or interactorPopen.isRunning():
+            self.__processStderr(solutionPopen, interactorPopen)
+
+            if time.time() - startTime > self.timeout:
+                exitError = f'Termiating interaction due to the timeout ({self.timeout} seconds).'
+                break
+
+            if not solutionPopen.isRunning() and solutionPopen.poll != 0:
+                exitError = 'Solution got RE.'
+                break
+
+            if not interactorPopen.isRunning() and interactorPopen.poll != 0:
+                exitError = 'Interactor got RE.'
+                break
+
+            solutionUnprocessedOutput = solutionPopen.getLine('stdout')
+            if solutionUnprocessedOutput is not None:
+                self.__printWithSeparator(solutionUnprocessedOutput, 0, None, None, None)
+                interactorPopen.communicate(solutionUnprocessedOutput)
+
+            interactorUnprocessedOutput = interactorPopen.getLine('stdout')
+            if interactorUnprocessedOutput is not None:
+                self.__printWithSeparator(interactorUnprocessedOutput, Interactor.PADDING, 255, 255, 0)
+                solutionPopen.communicate(interactorUnprocessedOutput)
+
+        self.__finish(solutionPopen, interactorPopen, exitError)
+
+def main():
+    parser = ArgumentParser()
+    parser.add_argument('-solution',
+                        action='store',
+                        required=True,
+                        help='Path to the executable solution.')
+
+    parser.add_argument('-interactor',
+                        action='store',
+                        required=True,
+                        help='Path to the executable interactor.')
+
+    parser.add_argument('-timeout',
+                        action='store',
+                        type=float,
+                        required=False,
+                        default=10,
+                        help='Timeout in seconds.')
+
+    parser.add_argument('-input',
+                        action='store',
+                        required=False,
+                        help='Path to the input file for interactor.')
+
+    args = parser.parse_args()
+    interactor = Interactor(args)
+    interactor.run()
+
+if __name__ == '__main__':
+    main()
