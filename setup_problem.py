@@ -105,7 +105,7 @@ class ProblemSetter:
         
     def __createProblemFiles(self) -> None:
         directory = f'./{self.shortName}'
-        subprocess.run(['rm', '-r', directory])
+        subprocess.run(['rm', '-r', directory], capture_output=True)
         os.mkdir(directory)
 
         self.__createTests(directory)
