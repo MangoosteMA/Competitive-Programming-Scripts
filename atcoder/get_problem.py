@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
-from library.utils   import getHtml
 from library.problem import Problem
 
 def getProblemIndexAndTitle(name: str) -> tuple[str, str]:
