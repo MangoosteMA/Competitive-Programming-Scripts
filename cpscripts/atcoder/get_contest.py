@@ -7,7 +7,7 @@ from cpscripts.atcoder.get_problem import getProblemIndexAndTitle, parseProblemF
 def parseContestFromHtml(html: str, link: str=None) -> Contest:
     soup = BeautifulSoup(html, 'html.parser')
     titleNode = soup.find('title')
-    title = None if titleNode is None else titleNode.text
+    contestTitle = None if titleNode is None else titleNode.text
 
     problems = []
     for problem in soup.find_all('span', 'lang-en'):
@@ -16,4 +16,4 @@ def parseContestFromHtml(html: str, link: str=None) -> Contest:
     for index, title in enumerate(soup.find_all('span', {'class': 'h2'})):
         problems[index].index, problems[index].title = getProblemIndexAndTitle(title.text)
 
-    return Contest(title=title, link=link, problems=problems)
+    return Contest(title=contestTitle, link=link, problems=problems)
