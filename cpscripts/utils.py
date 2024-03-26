@@ -7,16 +7,15 @@ from typing import Optional, Any
 
 def compareOutput(outputLines: list[str], correctOutputLines: list[str]) -> list[int]:
     if correctOutputLines is None or outputLines is None:
-        return []
+        return True
 
-    differentLines = []
     for i in range(0, max(len(outputLines), len(correctOutputLines))):
         outputLine = outputLines[i] if i < len(outputLines) else ''
         correctLine = correctOutputLines[i] if i < len(correctOutputLines) else ''
         if outputLine.strip() != correctLine.strip():
-            differentLines.append(i)
+            return False
 
-    return differentLines
+    return True
 
 def addEmptyLine(lines: list[str]) -> list[str]:
     clone = [line for line in lines]
@@ -24,17 +23,19 @@ def addEmptyLine(lines: list[str]) -> list[str]:
         clone.append('')
     return clone
 
-def colorfulLinesPrint(lines: list[str], differentLines: list[int], r: int, g: int, b: int) -> None:
-    differentLines.sort()
-    linePtr = 0
+def colorfedLinesPrint(lines: list[str], correctLines: list[str], r: int, g: int, b: int) -> None:
     for i, line in enumerate(lines):
-        while linePtr < len(differentLines) and differentLines[linePtr] < i:
-            linePtr += 1
-
-        if linePtr < len(differentLines) and differentLines[linePtr] == i:
-            print(colored(line, r, g, b))
-        else:
-            print(line)
+        lineParts = line.split(' ')
+        correctParts = (correctLines[i] if correctLines is not None and i < len(correctLines) else '').split(' ')
+        coloredParts = []
+        for j, part in enumerate(lineParts):
+            correctPart = correctParts[j] if j < len(correctParts) else ''
+            if part != correctPart:
+                coloredParts.append(colored(part, r, g, b))
+            else:
+                coloredParts.append(part)
+        
+        print(' '.join(coloredParts))
 
 class JudgeSystem(Enum):
     CODEFORCES     = 0

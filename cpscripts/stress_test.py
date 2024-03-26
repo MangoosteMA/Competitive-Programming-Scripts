@@ -4,7 +4,7 @@ import re
 import subprocess
 import sys
 
-from .utils import colored, dumpError, compareOutput, addEmptyLine, colorfulLinesPrint
+from .utils import colored, dumpError, compareOutput, addEmptyLine, colorfedLinesPrint
 
 class StressTester:
     '''
@@ -70,12 +70,11 @@ class StressTester:
 
     @staticmethod
     def __dumpSolutionsOutput(solutionOutputLines: list[str], bruteOutputLines: list[str]) -> None:
-        differentLines = compareOutput(solutionOutputLines, bruteOutputLines)
         print(StressTester.SOLVE_OUTPUT)
-        colorfulLinesPrint(addEmptyLine(solutionOutputLines), differentLines, 255, 120, 120)
+        colorfedLinesPrint(addEmptyLine(solutionOutputLines), bruteOutputLines, 255, 120, 120)
 
         print(StressTester.CORRECT_OUTPUT)
-        colorfulLinesPrint(addEmptyLine(bruteOutputLines), differentLines, 120, 255, 120)
+        colorfedLinesPrint(addEmptyLine(bruteOutputLines), solutionOutputLines, 120, 255, 120)
 
     def __validateOutput(self, solutionRunResult: subprocess.CompletedProcess) -> None:
         with open(StressTester.TEST_NAME, 'r') as testFile:
@@ -91,7 +90,7 @@ class StressTester:
 
         solutionOutputLines = solutionRunResult.stdout.decode().split('\n')
         bruteOutputLines = bruteRunResult.stdout.decode().split('\n')
-        if len(compareOutput(solutionOutputLines, bruteOutputLines)) != 0:
+        if not compareOutput(solutionOutputLines, bruteOutputLines):
             dumpError('\nWrong answer')
             self.__dumpTest()
             self.__dumpSolutionsOutput(solutionOutputLines, bruteOutputLines)
