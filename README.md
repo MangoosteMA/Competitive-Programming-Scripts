@@ -15,7 +15,7 @@ setup_contest -html ~/Downloads/contest.html -title cf1637
 setup_contest -url https://codeforces.com/contest/1637/problems
 setup_contest -url https://atcoder.jp/contests/agc010/tasks_print
 ```
-<img src="screen_shots/setup_contest.png" height="340px">
+<img src="screenshots/setup_contest.png" height="340px">
 
 ## Problems parsing
 
@@ -29,7 +29,7 @@ setup_problem -html ~/Downloads/problem.html -index H
 setup_problem -url https://codeforces.com/contest/1637/problem/H
 setup_problem -url https://atcoder.jp/contests/agc010/tasks/agc010_f
 ```
-<img src="screen_shots/setup_problem.png" height="70px">
+<img src="screenshots/setup_problem.png" height="70px">
 
 ## Compilation and problems testing
 
@@ -43,7 +43,7 @@ fcmpl main
 fbld main
 drun main
 ```
-<img src="screen_shots/bld.png" height="300px">
+<img src="screenshots/bld.png" height="300px">
 
 ## Stress testing
 
@@ -51,7 +51,7 @@ To stress test your solution you need to implement generator and correct solutio
 ```shell
 stress_test -sol main -gen gen.py -brute brute
 ```
-<img src="screen_shots/stress_test.png" height="300px">
+<img src="screenshots/stress_test.png" height="300px">
 
 ## Testing interactive problems
 
@@ -59,7 +59,7 @@ To test interactive problem you need to implement interactor. For example:
 ```shell
 interact -sol main -int interactor -input in1
 ```
-<img src="screen_shots/interact.png" height="280px">
+<img src="screenshots/interact.png" height="280px">
 
 ## Instalation or settings update
 
