@@ -1,0 +1,28 @@
+{
+    "debug": {
+        "compiler": "clang++",
+        "flags": [
+            "DLOCAL",
+            "g",
+            "std=c++20",
+            "D_GLIBCXX_DEBUG",
+            "Wall",
+            "Wextra",
+            "fsanitize=address,undefined,bounds"
+        ]
+    },
+    "release": {
+        "compiler": "clang++",
+        "flags": [
+            "DLOCAL",
+            "O2",
+            "std=c++20"
+        ]
+    },
+    "problem_files": {
+        "a.cpp": "/Users/alex/Programming/Algorithm-Library/template_multitest.cpp",
+        "debug.h": "/Users/alex/Programming/Algorithm-Library/debug.h"
+    },
+    "contest_files": {
+    }
+}

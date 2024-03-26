@@ -7,8 +7,7 @@ from argparse  import ArgumentParser
 from queue     import Queue
 from threading import Thread
 from typing    import Optional
-
-from library.utils import colored, dumpError
+from .utils    import colored, dumpError
 
 class ExecutingPopen:
     '''
@@ -79,8 +78,8 @@ class Interactor:
     PADDING        = len('........................')
 
     def __init__(self, args):
-        self.solutionExecutable = args.solution
-        self.interactorExecutable = args.interactor
+        self.solutionExecutable = args.sol
+        self.interactorExecutable = args.int
         self.timeout = args.timeout
 
         if self.__checkFile(args.input):
@@ -98,7 +97,7 @@ class Interactor:
 
     @staticmethod
     def __checkFile(fileName: str) -> bool:
-        if os.path.isfile(fileName):
+        if fileName is None or os.path.isfile(fileName):
             return True
 
         dumpError(f'No such file: {fileName}')
@@ -177,12 +176,12 @@ class Interactor:
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('-solution',
+    parser.add_argument('-sol',
                         action='store',
                         required=True,
                         help='Path to the executable solution.')
 
-    parser.add_argument('-interactor',
+    parser.add_argument('-int',
                         action='store',
                         required=True,
                         help='Path to the executable interactor.')
@@ -202,6 +201,3 @@ def main():
     args = parser.parse_args()
     interactor = Interactor(args)
     interactor.run()
-
-if __name__ == '__main__':
-    main()

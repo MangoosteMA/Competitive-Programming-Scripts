@@ -1,18 +1,18 @@
-from argparse import ArgumentParser
+import argparse
 import os
 import re
 import subprocess
 import sys
 
-from library.utils import colored, dumpError, compareOutput, addEmptyLine, colorfulLinesPrint
+from .utils import colored, dumpError, compareOutput, addEmptyLine, colorfulLinesPrint
 
 class StressTester:
     '''
     Variables:
-    testsNumber:     int
-    solveExecutable: str
-    genExecutable:   str
-    bruteExecutable: str
+    testsNumber:        int
+    solutionExecutable: str
+    genExecutable:      str
+    bruteExecutable:    str
     '''
 
     TEST_NAME = 'in_stress'
@@ -21,9 +21,9 @@ class StressTester:
     CORRECT_OUTPUT = colored('Correct output:', 255, 165, 0)
     ERR = colored('Err', 255, 165, 0)
 
-    def __init__(self, args):
+    def __init__(self, args: argparse.Namespace):
         self.testsNumber = args.tests
-        self.solveExecutable = args.solve
+        self.solutionExecutable = args.sol
         self.genExecutable = args.gen
         self.bruteExecutable = args.brute
         self.__checkExecutableFiles()
@@ -39,7 +39,7 @@ class StressTester:
 # Private:
 
     def __checkExecutableFiles(self) -> None:
-        for executableFile in [self.solveExecutable, self.genExecutable, self.bruteExecutable]:
+        for executableFile in [self.solutionExecutable, self.genExecutable, self.bruteExecutable]:
             if executableFile is not None and not os.path.isfile(executableFile):
                 dumpError(f'No such file: {executableFile}')
                 sys.exit(0)
@@ -101,7 +101,7 @@ class StressTester:
         self.__generateTest(testIndex)
 
         with open(StressTester.TEST_NAME, 'r') as testFile:
-            solutionRunResult = subprocess.run([f'./{self.solveExecutable}'],
+            solutionRunResult = subprocess.run([f'./{self.solutionExecutable}'],
                                                stdin=testFile,
                                                stdout=subprocess.PIPE,
                                                stderr=subprocess.PIPE)
@@ -116,8 +116,8 @@ class StressTester:
             self.__validateOutput(solutionRunResult)
 
 def main():
-    parser = ArgumentParser()
-    parser.add_argument('-solve',
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-sol',
                         action='store',
                         required=True,
                         help='Path to the maby incorrect executable solution.')
@@ -142,6 +142,3 @@ def main():
     args = parser.parse_args()
     stressTester = StressTester(args)
     stressTester.run()
-
-if __name__ == '__main__':
-    main()

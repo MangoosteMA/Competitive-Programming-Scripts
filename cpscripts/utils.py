@@ -1,7 +1,9 @@
+import json
+import os
 import requests
 
 from enum   import Enum
-from typing import Optional
+from typing import Optional, Any
 
 def compareOutput(outputLines: list[str], correctOutputLines: list[str]) -> list[int]:
     if correctOutputLines is None or outputLines is None:
@@ -63,3 +65,10 @@ def dumpError(message: str) -> None:
 def getHtml(url: str) -> Optional[str]:
     result = requests.get(url)
     return None if result.status_code != 200 else result.text
+
+def loadSettings() -> dict[str: Any]:
+    settingsPath = os.path.join(os.path.dirname(__file__), 'settings.json')
+    with open(settingsPath, 'r') as settingsFile:
+        jsonData = json.loads(settingsFile.read())
+    
+    return jsonData

@@ -3,11 +3,12 @@ import re
 import subprocess
 import sys
 import time
+import argparse
 
-from enum          import Enum
-from dataclasses   import dataclass
-from argparse      import ArgumentParser
-from library.utils import colored, dumpError, compareOutput, addEmptyLine, colorfulLinesPrint
+from dataclasses import dataclass
+from enum        import Enum
+from typing      import Any
+from .utils      import colored, dumpError, compareOutput, addEmptyLine, colorfulLinesPrint, loadSettings
 
 @dataclass
 class Test:
@@ -50,7 +51,7 @@ class Tester:
     EXPECTED_OUTPUT = colored('Expected output', 255, 165, 0)
     ERR = colored('Err', 255, 165, 0)
 
-    def __init__(self, args):
+    def __init__(self, args: argparse.Namespace):
         self.mainExecutable = args.exec
         self.extention = args.ext
 
@@ -64,14 +65,15 @@ class Tester:
     def run(self) -> None:
         if self.compilerPath is not None:
             self.__compile()
+            if not self.compileOnly:
+                print()
 
         if not self.compileOnly:
-            print()
             self.__runTests()
 
 # Private:
 
-    def __parseCompiler(self, args) -> None:
+    def __parseCompiler(self, args: argparse.Namespace) -> None:
         self.compilerPath = args.compiler
         self.compilationFlags = ['-' + flag for flag in args.flags]
 
@@ -213,8 +215,8 @@ class Tester:
 
         self.__dumpTestsVerdicts(verdictsCounter)
 
-def main():
-    parser = ArgumentParser()
+def main(defaultArgs: dict[str: Any]={}) -> None:
+    parser = argparse.ArgumentParser()
     parser.add_argument('exec',
                         action='store',
                         metavar='exec',
@@ -223,7 +225,7 @@ def main():
     parser.add_argument('-ext',
                         action='store',
                         metavar='ext',
-                        default='cpp',
+                        default=defaultArgs.get('ext', 'cpp'),
                         help='Extention of the solution file (required for compilation).')
 
     parser.add_argument('-test',
@@ -235,6 +237,7 @@ def main():
 
     parser.add_argument('-compiler',
                         metavar='compiler',
+                        default=defaultArgs.get('compiler', None),
                         help='Path to the compiler. ' +
                              'If not specified, then program will not be compiled.')
 
@@ -242,22 +245,36 @@ def main():
                         dest='flags',
                         nargs='*',
                         metavar='flags',
-                        default=[],
+                        default=defaultArgs.get('flags', []),
                         help='Compilation flags.')
 
     parser.add_argument('-cmplonly',
                         action='store_true',
-                        default=False,
+                        default=defaultArgs.get('cmplonly', False),
                         help='Add if you want only to compile.')
 
     parser.add_argument('-noerr',
                         action='store_true',
-                        default=False,
+                        default=defaultArgs.get('noerr', False),
                         help='Hide err output.')
 
     args = parser.parse_args()
     tester = Tester(args)
     tester.run()
 
-if __name__ == '__main__':
-    main()
+def bld(command: str='debug') -> None:
+    settings = loadSettings().get(command, {})
+    main({'compiler': settings.get('compiler', None),
+          'flags':    settings.get('flags', [])     })
+
+def fbld() -> None:
+    bld('release')
+
+def cmpl(command: str='debug') -> None:
+    settings = loadSettings().get(command, {})
+    main({'compiler': settings.get('compiler', None),
+          'flags':    settings.get('flags', [])     ,
+          'cmplonly': True                          })
+
+def fcmpl() -> None:
+    cmpl('release')

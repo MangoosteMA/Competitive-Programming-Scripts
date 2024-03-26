@@ -1,16 +1,15 @@
-import os
 import argparse
+import os
 import subprocess
 import sys
 
-from dataclasses                import dataclass
-from typing                     import Optional
-from library.problem            import Problem
-from library.utils              import colored, JudgeSystem, dumpError, getHtml
-
-from codeforces.get_problem     import parseProblemFromHtml as cfParseProblemFromHtml
-from atcoder.get_problem        import parseProblemFromHtml as atcoderParseProblemFromHtml
-from yandex_contest.get_problem import parseProblemFromHtml as yandexParseProblemFromHtml
+from dataclasses                 import dataclass
+from typing                      import Optional
+from .lib.problem                import Problem
+from .utils                      import colored, JudgeSystem, dumpError, getHtml, loadSettings
+from .codeforces.get_problem     import parseProblemFromHtml as cfParseProblemFromHtml
+from .atcoder.get_problem        import parseProblemFromHtml as atcoderParseProblemFromHtml
+from .yandex_contest.get_problem import parseProblemFromHtml as yandexParseProblemFromHtml
 
 @dataclass
 class File:
@@ -47,7 +46,7 @@ class ProblemSetter:
     problem:      Problem or None
     '''
 
-    def __init__(self, args):
+    def __init__(self, args: argparse.Namespace):
         self.problemUrl = args.url
         self.shortName = args.index
         self.htmlPath = args.html
@@ -68,6 +67,9 @@ class ProblemSetter:
 
     def __parseProblemFiles(self, args) -> None:
         self.problemFiles = []
+        if args.problemFiles is None:
+            return
+
         for fileName, templatePath in args.problemFiles:
             if not os.path.isfile(templatePath):
                 dumpError(f'No such file: {templatePath}')
@@ -123,8 +125,9 @@ class ProblemSetter:
         directory = f'./{self.shortName}'
         createProblemFiles(self.problem, self.problemFiles, directory)
 
-
 def main():
+    problemFiles = list(loadSettings().get('problem_files', {}).items())
+
     parser = argparse.ArgumentParser(description='Problem arguments parser.')
     parser.add_argument('-url',
                         dest='url',
@@ -143,6 +146,7 @@ def main():
                         nargs=2,
                         action='append',
                         metavar=('file-name', 'file-template'),
+                        default=problemFiles,
                         help='File to be created (copy of file-template).')
 
     parser.add_argument('-html',
@@ -159,6 +163,3 @@ def main():
     args = parser.parse_args()
     problemSetter = ProblemSetter(args)
     problemSetter.run()
-
-if __name__ == '__main__':
-    main()

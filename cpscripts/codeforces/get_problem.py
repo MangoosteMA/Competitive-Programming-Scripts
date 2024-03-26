@@ -1,11 +1,6 @@
-import os
-import re
-import sys
 from bs4 import BeautifulSoup
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
-
-from library.problem import Problem
+from cpscripts.lib.problem import Problem
 
 def parseProblemFromHtml(html: str, link: str=None) -> Problem:
     soup = BeautifulSoup(html, 'html.parser')

@@ -3,12 +3,12 @@ import os
 import subprocess
 import sys
 
-from typing                 import Optional
-from library.contest        import Contest
-from library.utils          import colored, getHtml, JudgeSystem, dumpError
-from codeforces.get_contest import parseContestFromHtml as cfParseContestFromHtml
-from atcoder.get_contest    import parseContestFromHtml as atcoderParseContestFromHtml
-from setup_problem          import File, createProblemFiles
+from typing                  import Optional
+from .lib.contest            import Contest
+from .utils                  import colored, getHtml, JudgeSystem, dumpError, loadSettings
+from .codeforces.get_contest import parseContestFromHtml as cfParseContestFromHtml
+from .atcoder.get_contest    import parseContestFromHtml as atcoderParseContestFromHtml
+from .setup_problem          import File, createProblemFiles
 
 class ContestSetter:
     '''
@@ -22,7 +22,7 @@ class ContestSetter:
     const:        Contest or None
     '''
 
-    def __init__(self, args):
+    def __init__(self, args: argparse.Namespace):
         self.contestUrl = args.url
         self.contestName = args.title
         self.htmlPath = args.html
@@ -121,6 +121,9 @@ class ContestSetter:
         self.__createProblems(directory)
 
 def main():
+    problemFiles = list(loadSettings().get('problem_files', {}).items())
+    contestFiles = list(loadSettings().get('contest_files', {}).items())
+
     parser = argparse.ArgumentParser(description='Contest arguments parser.')
     parser.add_argument('-url',
                         dest='url',
@@ -133,6 +136,7 @@ def main():
                         nargs=2,
                         action='append',
                         metavar=('file-name', 'file-template'),
+                        default=problemFiles,
                         help='File to be created for each problem (copy of file-template).')
 
     parser.add_argument('-contest-file',
@@ -140,6 +144,7 @@ def main():
                         nargs=2,
                         action='append',
                         metavar=('file-name', 'file-template'),
+                        default=contestFiles,
                         help='File to be created (copy of file-template).')
 
     parser.add_argument('-title',
@@ -162,6 +167,3 @@ def main():
     args = parser.parse_args()
     contestSetter = ContestSetter(args)
     contestSetter.run()
-
-if __name__ == '__main__':
-    main()
