@@ -1,5 +1,10 @@
 from setuptools import setup, find_packages
 
+packages = find_packages()
+LIB_PACKAGE = 'cpscripts.lib'
+if LIB_PACKAGE not in packages:
+    packages.append(LIB_PACKAGE)
+
 with open('README.md', 'r', encoding='utf-8') as readmeFile:
     readme = readmeFile.read()
 
@@ -11,7 +16,7 @@ setup(
     keywords='competitive programming scripts',
     url='https://github.com/MangoosteMA/Competitive-Programming-Scripts/',
     include_package_data=True,
-    packages=find_packages(),
+    packages=packages,
     long_description=readme,
     long_description_content_type='text/markdown',
     install_requires=[
