@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 
 from cpscripts.lib.problem import Problem
