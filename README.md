@@ -78,3 +78,8 @@ In case `PATH` warning is thrown, you need to add `/home/username/.local/bin` (t
 ```shell
 PATH="/home/username/.local/bin":"$PATH"
 ```
+
+You can uninstall it with `pip3`:
+```shell
+pip3 uninstall competitive_programming_scripts
+```
