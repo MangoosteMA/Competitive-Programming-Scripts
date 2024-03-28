@@ -1,6 +1,11 @@
 # Competitive programming scripts
 
-Scripts for testing solutions, parsing problems or contests, and so on.
+- [Contests parsing](#contests-parsing)
+- [Problems parsing](#problems-parsing)
+- [Compilation and problems testing](#compilation-and-problems-testing)
+- [Stress testing](#stress-testing)
+- [Testing interactive problems](#testing-interactive-problems)
+- [Installation or settings update](#installation-or-settings-update)
 
 ## Contests parsing
 
