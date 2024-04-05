@@ -25,6 +25,10 @@ def addEmptyLine(lines: list[str]) -> list[str]:
 
 def colorfedLinesPrint(lines: list[str], correctLines: list[str], r: int, g: int, b: int) -> None:
     for i, line in enumerate(lines):
+        if correctLines is None:
+            print(line)
+            continue
+
         lineParts = line.split(' ')
         correctParts = (correctLines[i] if correctLines is not None and i < len(correctLines) else '').split(' ')
         coloredParts = []

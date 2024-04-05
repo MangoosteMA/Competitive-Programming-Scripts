@@ -162,13 +162,13 @@ class Tester:
                                          stderr=subprocess.PIPE)
             executionTime = int((time.time() - processStartTime) * 1000)
 
-        outputLines = processData.stdout.decode().split('\n')
-        errOutput = processData.stderr.decode()
+        outputLines = processData.stdout.decode().rstrip('\n').split('\n')
+        errOutput = processData.stderr.decode().rstrip('\n')
 
         correctOutputLines = None
         if test.testAnswer is not None:
             with open(test.testAnswer, 'r') as testAnswer:
-                correctOutputLines = testAnswer.read().split('\n')
+                correctOutputLines = testAnswer.read().rstrip('\n').split('\n')
 
         if processData.returncode != 0:
             verdict = TestResult.RE
