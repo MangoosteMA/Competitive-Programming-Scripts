@@ -51,7 +51,7 @@ class ExecutingPopen:
 
         return False
 
-    def terminate(self):
+    def terminate(self) -> None:
         self.runningPopen.terminate()
 
 # Private:

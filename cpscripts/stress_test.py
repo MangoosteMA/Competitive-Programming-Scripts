@@ -96,7 +96,7 @@ class StressTester:
             self.__dumpSolutionsOutput(solutionOutputLines, bruteOutputLines)
             sys.exit(0)
 
-    def __runOneTest(self, testIndex: int) -> tuple[str, str]:
+    def __runOneTest(self, testIndex: int) -> None:
         self.__generateTest(testIndex)
 
         with open(StressTester.TEST_NAME, 'r') as testFile:
