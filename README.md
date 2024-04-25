@@ -68,7 +68,7 @@ interact -sol main -int interactor -input in1
 
 ## Installation or settings update
 
-Before installation set your own settings inside `settings.py`.
+Before installation set your own settings inside `settings.js`.
 
 Inside `debug` section there are settings used for `bld` and `cmpl`. Inside `release` section there are similar settings used for `fbld` and `fcmpl`.
 
