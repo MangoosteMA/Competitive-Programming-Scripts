@@ -55,6 +55,10 @@ class Tester:
         self.mainExecutable = args.exec
         self.extention = args.ext
 
+        if self.mainExecutable.endswith('.cpp'):
+            self.mainExecutable = self.mainExecutable[:-4]
+            self.extention = 'cpp'
+
         self.__parseCompiler(args)
         self.compileOnly = args.cmplonly
         if not self.compileOnly:
