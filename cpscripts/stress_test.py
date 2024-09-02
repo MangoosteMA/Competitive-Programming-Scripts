@@ -4,7 +4,7 @@ import re
 import subprocess
 import sys
 
-from .utils import colored, dumpError, compareOutput, addEmptyLine, coloredLinesPrint
+from .utils import colored, dumpError, compareOutput, addEmptyLine, coloredLinesPrint, runProcess
 
 class StressTester:
     '''
@@ -140,4 +140,4 @@ def main():
 
     args = parser.parse_args()
     stressTester = StressTester(args)
-    stressTester.run()
+    runProcess(stressTester.run)

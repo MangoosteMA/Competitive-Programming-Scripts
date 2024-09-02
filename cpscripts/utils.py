@@ -77,3 +77,10 @@ def loadSettings() -> dict[str: Any]:
         jsonData = json.loads(settingsFile.read())
     
     return jsonData
+
+def runProcess(run) -> None:
+    try:
+        run()
+    except KeyboardInterrupt:
+        print('\n')
+        print(colored('Stopped.', 255, 70, 0))

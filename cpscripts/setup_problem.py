@@ -6,7 +6,7 @@ import sys
 from dataclasses                 import dataclass
 from typing                      import Optional
 from .lib.problem                import Problem
-from .utils                      import colored, JudgeSystem, dumpError, getHtml, loadSettings
+from .utils                      import colored, JudgeSystem, dumpError, getHtml, loadSettings, runProcess
 from .codeforces.get_problem     import parseProblemFromHtml as cfParseProblemFromHtml
 from .atcoder.get_problem        import parseProblemFromHtml as atcoderParseProblemFromHtml
 from .yandex_contest.get_problem import parseProblemFromHtml as yandexParseProblemFromHtml
@@ -162,4 +162,4 @@ def main():
 
     args = parser.parse_args()
     problemSetter = ProblemSetter(args)
-    problemSetter.run()
+    runProcess(problemSetter.run)

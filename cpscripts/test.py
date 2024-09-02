@@ -8,7 +8,7 @@ import argparse
 from dataclasses import dataclass
 from enum        import Enum
 from typing      import Any
-from .utils      import colored, dumpError, compareOutput, addEmptyLine, coloredLinesPrint, loadSettings
+from .utils      import colored, dumpError, compareOutput, addEmptyLine, coloredLinesPrint, loadSettings, runProcess
 
 @dataclass
 class Test:
@@ -263,7 +263,7 @@ def main(defaultArgs: dict[str: Any]={}) -> None:
 
     args = parser.parse_args()
     tester = Tester(args)
-    tester.run()
+    runProcess(tester.run)
 
 def bld(command: str='debug') -> None:
     settings = loadSettings().get(command, {})

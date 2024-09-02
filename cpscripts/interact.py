@@ -7,7 +7,7 @@ from argparse  import ArgumentParser
 from queue     import Queue
 from threading import Thread
 from typing    import Optional
-from .utils    import colored, dumpError
+from .utils    import colored, dumpError, runProcess
 
 class ExecutingPopen:
     '''
@@ -200,4 +200,4 @@ def main():
 
     args = parser.parse_args()
     interactor = Interactor(args)
-    interactor.run()
+    runProcess(interactor.run)

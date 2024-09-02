@@ -5,7 +5,7 @@ import sys
 
 from typing                  import Optional
 from .lib.contest            import Contest
-from .utils                  import colored, getHtml, JudgeSystem, dumpError, loadSettings
+from .utils                  import colored, getHtml, JudgeSystem, dumpError, loadSettings, runProcess
 from .codeforces.get_contest import parseContestFromHtml as cfParseContestFromHtml
 from .atcoder.get_contest    import parseContestFromHtml as atcoderParseContestFromHtml
 from .setup_problem          import File, createProblemFiles
@@ -166,4 +166,4 @@ def main():
 
     args = parser.parse_args()
     contestSetter = ContestSetter(args)
-    contestSetter.run()
+    runProcess(contestSetter.run)
