@@ -1,7 +1,7 @@
 from .problem import Problem
 
 class Contest:
-    def __init__(self, title: str=None, link: str=None, problems=list[Problem]):
+    def __init__(self, title: str=None, link: str=None, problems: list[Problem]=None):
         self.title = title
         self.link = link
         self.problems = problems
