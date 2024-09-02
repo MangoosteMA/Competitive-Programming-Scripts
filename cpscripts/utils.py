@@ -23,7 +23,7 @@ def addEmptyLine(lines: list[str]) -> list[str]:
         clone.append('')
     return clone
 
-def colorfedLinesPrint(lines: list[str], correctLines: list[str], r: int, g: int, b: int) -> None:
+def coloredLinesPrint(lines: list[str], correctLines: list[str], r: int, g: int, b: int) -> None:
     for i, line in enumerate(lines):
         if correctLines is None:
             print(line)

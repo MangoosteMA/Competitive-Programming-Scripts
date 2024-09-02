@@ -8,7 +8,7 @@ import argparse
 from dataclasses import dataclass
 from enum        import Enum
 from typing      import Any
-from .utils      import colored, dumpError, compareOutput, addEmptyLine, colorfedLinesPrint, loadSettings
+from .utils      import colored, dumpError, compareOutput, addEmptyLine, coloredLinesPrint, loadSettings
 
 @dataclass
 class Test:
@@ -129,7 +129,7 @@ class Tester:
 
         outputLines = addEmptyLine(outputLines)
         print(f'{Tester.OUTPUT}:')
-        colorfedLinesPrint(outputLines, correctOutputLines, 255, 120, 120)
+        coloredLinesPrint(outputLines, correctOutputLines, 255, 120, 120)
 
         if not self.noErr and len(errOutput.strip()) > 0:
             print(f'{Tester.ERR}:')
@@ -140,7 +140,7 @@ class Tester:
         if correctOutputLines is not None:
             print(f'{Tester.EXPECTED_OUTPUT}:')
             correctOutputLines = addEmptyLine(correctOutputLines)
-            colorfedLinesPrint(correctOutputLines, outputLines, 120, 255, 120)
+            coloredLinesPrint(correctOutputLines, outputLines, 120, 255, 120)
 
     @staticmethod
     def __dumpSingleTestVerdict(verdict: TestResult, executionTime: int) -> None:

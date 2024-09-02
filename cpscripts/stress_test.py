@@ -4,7 +4,7 @@ import re
 import subprocess
 import sys
 
-from .utils import colored, dumpError, compareOutput, addEmptyLine, colorfedLinesPrint
+from .utils import colored, dumpError, compareOutput, addEmptyLine, coloredLinesPrint
 
 class StressTester:
     '''
@@ -71,10 +71,10 @@ class StressTester:
     @staticmethod
     def __dumpSolutionsOutput(solutionOutputLines: list[str], bruteOutputLines: list[str]) -> None:
         print(StressTester.SOLVE_OUTPUT)
-        colorfedLinesPrint(addEmptyLine(solutionOutputLines), bruteOutputLines, 255, 120, 120)
+        coloredLinesPrint(addEmptyLine(solutionOutputLines), bruteOutputLines, 255, 120, 120)
 
         print(StressTester.CORRECT_OUTPUT)
-        colorfedLinesPrint(addEmptyLine(bruteOutputLines), solutionOutputLines, 120, 255, 120)
+        coloredLinesPrint(addEmptyLine(bruteOutputLines), solutionOutputLines, 120, 255, 120)
 
     def __validateOutput(self, solutionRunResult: subprocess.CompletedProcess) -> None:
         with open(StressTester.TEST_NAME, 'r') as testFile:
