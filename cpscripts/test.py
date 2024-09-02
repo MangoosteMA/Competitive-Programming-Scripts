@@ -103,7 +103,11 @@ class Tester:
         self.tests.sort(key=lambda test: test.getTestIndex())
 
     def __compile(self) -> None:
-        solutionPath = f'{self.mainExecutable}.{self.extention}'
+        if self.mainExecutable.endswith('.cpp'):
+            solutionPath = self.mainExecutable
+        else:
+            solutionPath = f'{self.mainExecutable}.{self.extention}'
+
         if not os.path.isfile(solutionPath):
             dumpError(f'No solution file: {solutionPath}')
             sys.exit(0)
