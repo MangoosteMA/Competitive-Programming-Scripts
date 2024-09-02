@@ -79,9 +79,9 @@ chmod +x install.sh
 ./install.sh
 ```
 
-In case `PATH` warning is thrown, you need to add `/home/username/.local/bin` (the correct path must be mentioned in the warning) to the `PATH`:
+In case `PATH` warning is thrown, you need to add `/Users/<username>/Library/Python/<version>/bin` (the correct path must be mentioned in the warning) to the `PATH`:
 ```shell
-PATH="/home/username/.local/bin":"$PATH"
+PATH="/Users/<username>/Library/Python/<version>/bin":"$PATH"
 ```
 
 You can uninstall it with `pip3`:
